@@ -13,24 +13,28 @@ class ProductCategorySeeder extends Seeder
      */
     public function run(): void
     {
-        ProductCategory::create([
-            'name' => 'Kuliner',
-            'slug' => 'kuliner',
-        ]);
+        ProductCategory::factory()
+            ->count(5)
+            ->create();
 
-        ProductCategory::create([
-            'name' => 'Kecantikan',
-            'slug' => 'kecantikan',
-        ]);
+        // ProductCategory::create([
+        //     'name' => 'Kuliner',
+        //     'slug' => 'kuliner',
+        // ]);
 
-        ProductCategory::create([
-            'name' => 'Kriya',
-            'slug' => 'kriya',
-        ]);
+        // ProductCategory::create([
+        //     'name' => 'Kecantikan',
+        //     'slug' => 'kecantikan',
+        // ]);
 
-        ProductCategory::create([
-            'name' => 'Agrikultur',
-            'slug' => 'agrikultur',
-        ]);
+        // ProductCategory::create([
+        //     'name' => 'Kriya',
+        //     'slug' => 'kriya',
+        // ]);
+
+        // ProductCategory::create([
+        //     'name' => 'Agrikultur',
+        //     'slug' => 'agrikultur',
+        // ]);
     }
 }

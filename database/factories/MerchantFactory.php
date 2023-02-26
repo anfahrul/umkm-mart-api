@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\MerchantCategory;
+use App\Models\ProductCategory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Merchant>
@@ -20,7 +20,8 @@ class MerchantFactory extends Factory
         return [
             'merchant_id' => $this->faker->uuid(),
             'name' => $this->faker->company(),
-            'product_category_id' => $this->faker->numberBetween(1, 4),
+            'product_category_id' => ProductCategory::all()->random()->id,
+            // 'product_category_id' => $this->faker->numberBetween(1, 4),
             'address' => $this->faker->address(),
             'operational_time_oneday' => $this->faker->numberBetween(1, 24),
             'logo' => '-',

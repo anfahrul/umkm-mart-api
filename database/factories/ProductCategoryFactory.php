@@ -16,8 +16,11 @@ class ProductCategoryFactory extends Factory
      */
     public function definition(): array
     {
+        $randomName = $this->faker->word();
+
         return [
-            //
+            'name' => $randomName,
+            'slug' => $randomName
         ];
     }
 }
