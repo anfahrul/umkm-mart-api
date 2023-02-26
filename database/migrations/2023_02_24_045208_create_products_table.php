@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer("price");
             $table->string("image");
             $table->longText("description");
+            $table->boolean("is_available");
             $table->timestamps();
         });
     }

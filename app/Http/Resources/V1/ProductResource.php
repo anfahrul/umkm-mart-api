@@ -17,12 +17,13 @@ class ProductResource extends JsonResource
     {
         return [
             'productID' => $this->product_id,
-            'merchantID' => Product::find($this->product_id)->merchant->name,
+            'merchantID' => Product::find($this->product_id)->merchant->merchant_id,
             'name' => $this->name,
             'price' => $this->price,
             'image' => $this->image,
             'description' => $this->description,
             'productCategory' => Product::find($this->product_id)->productCategory->name,
+            'isAvailable' => $this->is_available,
         ];
     }
 }
