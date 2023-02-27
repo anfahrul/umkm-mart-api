@@ -44,6 +44,20 @@ class AuthenticationTest extends TestCase
         'data.updatedAt' => 'string',
     ];
 
+    private $responseAccessToken = [
+        'access_token',
+        'token_type',
+        'expires_in',
+        'user'
+    ];
+
+    private $responseAccessTokenType = [
+        'access_token' => 'string',
+        'token_type' => 'string',
+        'expires_in' => 'integer',
+        'user' => 'array'
+    ];
+
     /**
      * A basic feature test example.
      */
@@ -151,16 +165,8 @@ class AuthenticationTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJson(fn (AssertableJson $json) => $json
-            ->hasAll([
-                'access_token',
-                'token_type',
-                'expires_in',
-                'user',])
-            ->whereAllType([
-                'access_token' => 'string',
-                'token_type' => 'string',
-                'expires_in' => 'integer',
-                'user' => 'array',])
+            ->hasAll($this->responseAccessToken)
+            ->whereAllType($this->responseAccessTokenType)
             );
         $response->assertJson([
             'token_type' => 'Bearer',
@@ -247,6 +253,54 @@ class AuthenticationTest extends TestCase
         $response = $this->get('/api/v1/auth/user-profile', [
             'authorization' => 'Bearer $token',
             'Accept'=>'application/json'
+        ]);
+        $response
+        ->assertStatus(401)
+        ->assertJson([
+            'message' => 'Unauthenticated.',
+        ]);
+    }
+
+    public function test_user_can_get_refresh_token(): void {
+        $data = [
+            'name' => 'fahrul',
+            'email' => 'fahrul@example.com',
+            'password' => 'pass7890',
+            'password_confirmation' => 'pass7890',
+        ];
+
+        $response = $this->post('/api/v1/auth/register', $data);
+        $response->assertStatus(201);
+
+        $data = [
+            "email" => "fahrul@example.com",
+            "password" => "pass7890"
+        ];
+
+        $response = $this->post('/api/v1/auth/login', $data);
+        $response->assertStatus(200);
+
+        $accessToken = $response->decodeResponseJson()['access_token'];
+        $response = $this->post('/api/v1/auth/refresh', [
+            'authorization' => 'Bearer $accessToken',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson(fn (AssertableJson $json) => $json
+            ->hasAll($this->responseAccessToken)
+            ->whereAllType($this->responseAccessTokenType)
+            );
+        $response->assertJson([
+            'token_type' => 'Bearer',
+        ]);
+    }
+
+    public function test_invalid_get_refresh_token_because_old_token_is_wrong(): void {
+        $token = 'abc';
+
+        $response = $this->post('/api/v1/auth/refresh', [], [
+            'Accept' => 'application/json',
+            'Authorization' => 'Bearer $token'
         ]);
         $response
         ->assertStatus(401)

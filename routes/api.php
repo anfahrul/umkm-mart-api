@@ -27,6 +27,7 @@ Route::group([
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/user-profile', [AuthController::class, 'userProfile']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
 });
 
 // api/v1/merchants
