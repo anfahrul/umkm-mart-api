@@ -47,8 +47,7 @@ class AuthenticationTest extends TestCase
     /**
      * A basic feature test example.
      */
-    public function test_user_can_register(): void
-    {
+    public function test_user_can_register(): void {
         $data = [
             'name' => 'fahrul',
             'email' => 'fahrul@example.com',
@@ -65,8 +64,7 @@ class AuthenticationTest extends TestCase
         );
     }
 
-    public function test_email_address_is_registered(): void
-    {
+    public function test_email_address_is_registered(): void {
         $data = [
             'name' => 'fahrul',
             'email' => 'fahrul@example.com',
@@ -83,8 +81,7 @@ class AuthenticationTest extends TestCase
         ]);
     }
 
-    public function test_invalid_request_the_field_is_required(): void
-    {
+    public function test_invalid_request_the_field_is_required(): void {
         $data = [
             'name' => '',
             'email' => '',
@@ -102,8 +99,7 @@ class AuthenticationTest extends TestCase
         ]);
     }
 
-    public function test_invalid_email_address(): void
-    {
+    public function test_invalid_email_address(): void {
         $data = [
             'name' => 'fahrul',
             'email' => 'fahrulexample.com',
@@ -119,8 +115,7 @@ class AuthenticationTest extends TestCase
         ]);
     }
 
-    public function test_confirm_password_must_be_same(): void
-    {
+    public function test_confirm_password_must_be_same(): void {
         $data = [
             'name' => 'fahrul',
             'email' => 'fahrul@example.com',
@@ -136,8 +131,7 @@ class AuthenticationTest extends TestCase
         ]);
     }
 
-    public function test_user_can_login(): void
-    {
+    public function test_user_can_login(): void {
         $data = [
             'name' => 'fahrul',
             'email' => 'fahrul@example.com',
@@ -173,8 +167,7 @@ class AuthenticationTest extends TestCase
         ]);
     }
 
-    public function test_login_wrong_email_or_password(): void
-    {
+    public function test_login_wrong_email_or_password(): void {
         $data = [
             'name' => 'fahrul',
             'email' => 'fahrul@example.com',
@@ -198,8 +191,7 @@ class AuthenticationTest extends TestCase
         ]);
     }
 
-    public function test_login_email_or_password_is_required(): void
-    {
+    public function test_login_email_or_password_is_required(): void {
         $data = [
             'name' => 'fahrul',
             'email' => 'fahrul@example.com',
@@ -221,6 +213,45 @@ class AuthenticationTest extends TestCase
         $response->assertInvalid([
             'email' => 'The email field is required.',
             'password' => 'The password field is required.',
+        ]);
+    }
+
+    public function test_can_get_user_profile(): void {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+                         ->get('/api/v1/auth/user-profile');
+
+        $response->assertStatus(200);
+        $response->assertJson(fn (AssertableJson $json) => $json
+            ->hasAll($this->userResponseHas)
+            ->whereAllType($this->userResponseHasType)
+        );
+    }
+
+    public function test_invalid_get_user_profile_without_login(): void {
+        $response = $this->get('/api/v1/auth/user-profile', [
+            'Accept'=>'application/json'
+        ]);
+        $response
+        ->assertStatus(401)
+        ->assertJson([
+            'message' => 'Unauthenticated.',
+        ]);
+    }
+
+    public function test_invalid_get_user_profile_because_token_is_wrong(): void {
+        $user = User::first();
+        $token = 'abc';
+
+        $response = $this->get('/api/v1/auth/user-profile', [
+            'authorization' => 'Bearer $token',
+            'Accept'=>'application/json'
+        ]);
+        $response
+        ->assertStatus(401)
+        ->assertJson([
+            'message' => 'Unauthenticated.',
         ]);
     }
 }
