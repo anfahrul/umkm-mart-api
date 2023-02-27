@@ -25,6 +25,7 @@ Route::group([
     'prefix' => 'v1/auth'
 ], function ($router) {
     Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 });
 
 // api/v1/merchants

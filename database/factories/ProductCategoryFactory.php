@@ -16,7 +16,7 @@ class ProductCategoryFactory extends Factory
      */
     public function definition(): array
     {
-        $randomName = $this->faker->word();
+        $randomName = $this->faker->uuid();
 
         return [
             'name' => $randomName,

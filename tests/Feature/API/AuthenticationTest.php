@@ -135,4 +135,92 @@ class AuthenticationTest extends TestCase
             'password' => 'The password field confirmation does not match.',
         ]);
     }
+
+    public function test_user_can_login(): void
+    {
+        $data = [
+            'name' => 'fahrul',
+            'email' => 'fahrul@example.com',
+            'password' => 'pass7890',
+            'password_confirmation' => 'pass7890',
+        ];
+
+        $response = $this->post('/api/v1/auth/register', $data);
+        $response->assertStatus(201);
+
+        $data = [
+            "email" => "fahrul@example.com",
+            "password" => "pass7890"
+        ];
+
+        $response = $this->post('/api/v1/auth/login', $data);
+
+        $response->assertStatus(200);
+        $response->assertJson(fn (AssertableJson $json) => $json
+            ->hasAll([
+                'access_token',
+                'token_type',
+                'expires_in',
+                'user',])
+            ->whereAllType([
+                'access_token' => 'string',
+                'token_type' => 'string',
+                'expires_in' => 'integer',
+                'user' => 'array',])
+            );
+        $response->assertJson([
+            'token_type' => 'Bearer',
+        ]);
+    }
+
+    public function test_login_wrong_email_or_password(): void
+    {
+        $data = [
+            'name' => 'fahrul',
+            'email' => 'fahrul@example.com',
+            'password' => 'pass7890',
+            'password_confirmation' => 'pass7890',
+        ];
+
+        $response = $this->post('/api/v1/auth/register', $data);
+        $response->assertStatus(201);
+
+        $data = [
+            "email" => "fahrul@example.co",
+            "password" => "pass789000"
+        ];
+
+        $response = $this->post('/api/v1/auth/login', $data);
+
+        $response->assertStatus(401);
+        $response->assertJson([
+            'errors' => 'Unauthorized',
+        ]);
+    }
+
+    public function test_login_email_or_password_is_required(): void
+    {
+        $data = [
+            'name' => 'fahrul',
+            'email' => 'fahrul@example.com',
+            'password' => 'pass7890',
+            'password_confirmation' => 'pass7890',
+        ];
+
+        $response = $this->post('/api/v1/auth/register', $data);
+        $response->assertStatus(201);
+
+        $data = [
+            'email' => '',
+            'password' => ''
+        ];
+
+        $response = $this->post('/api/v1/auth/login', $data);
+
+        $response->assertStatus(302);
+        $response->assertInvalid([
+            'email' => 'The email field is required.',
+            'password' => 'The password field is required.',
+        ]);
+    }
 }
