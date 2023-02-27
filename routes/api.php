@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,14 +19,27 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// api/v1/auth
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'v1/auth'
+], function ($router) {
+    Route::post('/register', [AuthController::class, 'register']);
+});
+
 // api/v1/merchants
-Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1'], function() {
+Route::group([
+    'prefix' => 'v1',
+    'namespace' => 'App\Http\Controllers\Api\V1'
+], function() {
     Route::apiResource('merchants', MerchantController::class);
-    // Route::get('merchants/info?merchant_id={merchant_id}', 'MerchantController@show');
 });
 
 // api/v1/products
-Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1'], function() {
+Route::group([
+    'prefix' => 'v1',
+    'namespace' => 'App\Http\Controllers\Api\V1'
+], function() {
     Route::apiResource('products', ProductController::class);
     Route::apiResource('product_categories', ProductCategoryController::class);
 });

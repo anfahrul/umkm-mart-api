@@ -1,0 +1,138 @@
+<?php
+
+namespace Tests\Feature\API;
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Tests\TestCase;
+use Illuminate\Testing\Fluent\AssertableJson;
+use App\Models\User;
+
+class AuthenticationTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void {
+        parent::setUp();
+
+        $this->seed([
+            'ProductCategorySeeder',
+            'MerchantSeeder',
+            'ProductSeeder',
+        ]);
+    }
+
+    protected function tearDown(): void {
+        parent::tearDown();
+    }
+
+    private $userResponseHas = [
+        'data',
+        'data.id',
+        'data.name',
+        'data.email',
+        'data.createdAt',
+        'data.updatedAt',
+    ];
+
+    private $userResponseHasType = [
+        'data' => 'array',
+        'data.id' => 'integer',
+        'data.name' => 'string',
+        'data.email' => 'string',
+        'data.createdAt' => 'string',
+        'data.updatedAt' => 'string',
+    ];
+
+    /**
+     * A basic feature test example.
+     */
+    public function test_user_can_register(): void
+    {
+        $data = [
+            'name' => 'fahrul',
+            'email' => 'fahrul@example.com',
+            'password' => 'pass7890',
+            'password_confirmation' => 'pass7890',
+        ];
+
+        $response = $this->post('/api/v1/auth/register', $data);
+
+        $response->assertStatus(201);
+        $response->assertJson(fn (AssertableJson $json) => $json
+            ->hasAll($this->userResponseHas)
+            ->whereAllType($this->userResponseHasType)
+        );
+    }
+
+    public function test_email_address_is_registered(): void
+    {
+        $data = [
+            'name' => 'fahrul',
+            'email' => 'fahrul@example.com',
+            'password' => 'pass7890',
+            'password_confirmation' => 'pass7890',
+        ];
+
+        $response = $this->post('/api/v1/auth/register', $data);
+        $response = $this->post('/api/v1/auth/register', $data);
+
+        $response->assertStatus(302);
+        $response->assertInvalid([
+            'email' => 'The email has already been taken.',
+        ]);
+    }
+
+    public function test_invalid_request_the_field_is_required(): void
+    {
+        $data = [
+            'name' => '',
+            'email' => '',
+            'password' => '',
+            'password_confirmation' => '',
+        ];
+
+        $response = $this->post('/api/v1/auth/register', $data);
+
+        $response->assertStatus(302);
+        $response->assertInvalid([
+            'name' => 'The name field is required.',
+            'email' => 'The email field is required.',
+            'password' => 'The password field is required.',
+        ]);
+    }
+
+    public function test_invalid_email_address(): void
+    {
+        $data = [
+            'name' => 'fahrul',
+            'email' => 'fahrulexample.com',
+            'password' => 'pass7890',
+            'password_confirmation' => 'pass7890',
+        ];
+
+        $response = $this->post('/api/v1/auth/register', $data);
+
+        $response->assertStatus(302);
+        $response->assertInvalid([
+            'email' => 'The email field must be a valid email address.',
+        ]);
+    }
+
+    public function test_confirm_password_must_be_same(): void
+    {
+        $data = [
+            'name' => 'fahrul',
+            'email' => 'fahrul@example.com',
+            'password' => 'pass7890',
+            'password_confirmation' => '7890pass',
+        ];
+
+        $response = $this->post('/api/v1/auth/register', $data);
+
+        $response->assertStatus(302);
+        $response->assertInvalid([
+            'password' => 'The password field confirmation does not match.',
+        ]);
+    }
+}
