@@ -300,8 +300,54 @@ class AuthenticationTest extends TestCase
 
         $response = $this->post('/api/v1/auth/refresh', [], [
             'Accept' => 'application/json',
-            'Authorization' => 'Bearer $token'
+            'Authorization' => "Bearer $token"
         ]);
+        $response
+        ->assertStatus(401)
+        ->assertJson([
+            'message' => 'Unauthenticated.',
+        ]);
+    }
+
+    public function test_can_logout(): void {
+        $data = [
+            'name' => 'fahrul',
+            'email' => 'fahrul@example.com',
+            'password' => 'pass7890',
+            'password_confirmation' => 'pass7890',
+        ];
+
+        $response = $this->post('/api/v1/auth/register', $data);
+        $response->assertStatus(201);
+
+        $data = [
+            "email" => "fahrul@example.com",
+            "password" => "pass7890"
+        ];
+
+        $response = $this->post('/api/v1/auth/login', $data);
+        $response->assertStatus(200);
+
+
+        $accessToken = $response->decodeResponseJson()['access_token'];
+        $response = $this->post('/api/v1/auth/logout', [], [
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer $accessToken",
+        ]);
+
+        $response
+        ->assertStatus(200)
+        ->assertJson([
+            'message' => 'User successfully signed out.',
+        ]);
+    }
+
+    public function test_invalid_logout_because_user_not_authenticate(): void {
+        $response = $this->post('/api/v1/auth/logout', [], [
+            'Accept' => 'application/json',
+            'Authorization' => 'Bearer abc',
+        ]);
+
         $response
         ->assertStatus(401)
         ->assertJson([
