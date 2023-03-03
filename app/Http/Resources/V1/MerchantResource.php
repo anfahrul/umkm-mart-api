@@ -18,6 +18,7 @@ class MerchantResource extends JsonResource
     {
         return [
             'merchantID' => $this->merchant_id,
+            'userID' => $this->user_id,
             'name' => $this->name,
             'merchantCategory' => Merchant::find($this->merchant_id)->productCategory->name,
             'address' => $this->address,

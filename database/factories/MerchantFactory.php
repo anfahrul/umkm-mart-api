@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\ProductCategory;
+use App\Models\User;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Merchant>
@@ -21,7 +22,8 @@ class MerchantFactory extends Factory
             'merchant_id' => $this->faker->uuid(),
             'name' => $this->faker->company(),
             'product_category_id' => ProductCategory::all()->random()->id,
-            // 'product_category_id' => $this->faker->numberBetween(1, 4),
+            // 'user_id' => User::all()->random()->id,
+            'user_id' => $this->faker->unique()->randomElement([1, 2, 3, 4, 5]),
             'address' => $this->faker->address(),
             'operational_time_oneday' => $this->faker->numberBetween(1, 24),
             'logo' => '-',

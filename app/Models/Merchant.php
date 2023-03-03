@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Merchant extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     protected $table = 'merchants';
     protected $primaryKey = 'merchant_id';
@@ -22,5 +23,9 @@ class Merchant extends Model
 
     public function products() {
         return $this->hasMany(Product::class, 'merchant_id');
+    }
+
+    public function user() {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
