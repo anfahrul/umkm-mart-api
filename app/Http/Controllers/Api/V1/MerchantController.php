@@ -121,8 +121,20 @@ class MerchantController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Merchant $merchant)
+    public function destroy($merchant_id)
     {
-        //
+        $merchant = Merchant::find($merchant_id);
+
+        if ($merchant === null) {
+            return response()->json([
+                'errors' => 'Merchant is not found.'
+            ], Response::HTTP_NOT_FOUND);
+        } else {
+            $merchant->delete();
+
+            return response()->json([
+                'messages' => 'Merchant is deleted successful.'
+            ], Response::HTTP_OK);
+        }
     }
 }

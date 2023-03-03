@@ -42,6 +42,7 @@ Route::group([
     Route::get('merchants', [MerchantController::class, 'index']);
     Route::get('merchants/{merchant_id}', [MerchantController::class, 'show']);
     Route::put('merchants/{merchant_id}', [MerchantController::class, 'update']);
+    Route::delete('merchants/{merchant_id}', [MerchantController::class, 'destroy']);
 });
 
 // api/v1/products
