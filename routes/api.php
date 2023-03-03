@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\MerchantController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,10 +34,15 @@ Route::group([
 
 // api/v1/merchants
 Route::group([
+    'middleware' => 'api',
     'prefix' => 'v1',
-    'namespace' => 'App\Http\Controllers\Api\V1'
+    // 'namespace' => 'App\Http\Controllers\Api\V1'
 ], function() {
-    Route::apiResource('merchants', MerchantController::class);
+    Route::post('merchants', [MerchantController::class, 'store']);
+    Route::get('merchants', [MerchantController::class, 'index']);
+    Route::get('merchants/{merchant_id}', [MerchantController::class, 'show']);
+    Route::put('merchants/{merchant_id}', [MerchantController::class, 'update']);
+    Route::delete('merchants/{merchant_id}', [MerchantController::class, 'destroy']);
 });
 
 // api/v1/products

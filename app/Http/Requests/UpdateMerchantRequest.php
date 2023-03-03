@@ -11,7 +11,7 @@ class UpdateMerchantRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,13 @@ class UpdateMerchantRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['required','string'],
+            'product_category_id' => ['required','integer'],
+            'address' => ['required','string'],
+            'operational_time_oneday' => ['required','integer'],
+            'logo' => ['required','string'],
+            'is_open' => ['required','integer'],
+            'description' => ['required','string'],
         ];
     }
 }
