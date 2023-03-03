@@ -72,8 +72,15 @@ class MerchantController extends Controller
      */
     public function show($merchant_id)
     {
-        $merchantNew = Merchant::find($merchant_id);
-        return new MerchantProductsResource($merchantNew);
+        $merchantIsExist = Merchant::find($merchant_id);
+        if ($merchantIsExist === null) {
+            return response()->json([
+                'errors' => 'Merchant is not found.'
+            ], Response::HTTP_BAD_REQUEST);
+        } else {
+            $merchantNew = Merchant::find($merchant_id);
+            return new MerchantProductsResource($merchantNew);
+        }
     }
 
     /**
