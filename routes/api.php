@@ -41,6 +41,7 @@ Route::group([
     Route::post('merchants', [MerchantController::class, 'store']);
     Route::get('merchants', [MerchantController::class, 'index']);
     Route::get('merchants/{merchant_id}', [MerchantController::class, 'show']);
+    Route::put('merchants/{merchant_id}', [MerchantController::class, 'update']);
 });
 
 // api/v1/products

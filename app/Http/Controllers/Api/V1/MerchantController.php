@@ -94,9 +94,28 @@ class MerchantController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateMerchantRequest $request, Merchant $merchant)
+    public function update(UpdateMerchantRequest $request, $merchant_id)
     {
-        //
+        $merchant = Merchant::find($merchant_id);
+
+        if ($merchant === null) {
+            return response()->json([
+                'errors' => 'Merchant is not found.'
+            ], Response::HTTP_NOT_FOUND);
+        } else {
+            $merchant->name = $request->name;
+            $merchant->product_category_id = $request->product_category_id;
+            $merchant->address = $request->address;
+            $merchant->operational_time_oneday = $request->operational_time_oneday;
+            $merchant->logo = $request->logo;
+            $merchant->is_open = $request->is_open;
+            $merchant->description = $request->description;
+
+            $merchant->save();
+            return new MerchantResource($merchant);
+        }
+
+
     }
 
     /**
