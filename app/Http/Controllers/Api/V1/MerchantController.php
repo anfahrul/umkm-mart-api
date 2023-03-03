@@ -76,7 +76,7 @@ class MerchantController extends Controller
         if ($merchantIsExist === null) {
             return response()->json([
                 'errors' => 'Merchant is not found.'
-            ], Response::HTTP_BAD_REQUEST);
+            ], Response::HTTP_NOT_FOUND);
         } else {
             $merchantNew = Merchant::find($merchant_id);
             return new MerchantProductsResource($merchantNew);
