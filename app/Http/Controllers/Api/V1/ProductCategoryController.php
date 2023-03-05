@@ -6,6 +6,8 @@ use App\Models\ProductCategory;
 use App\Http\Requests\StoreProductCategoryRequest;
 use App\Http\Requests\UpdateProductCategoryRequest;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\V1\ProductCategoryResource;
+use App\Http\Resources\V1\ProductCategoryCollection;
 
 class ProductCategoryController extends Controller
 {
@@ -14,7 +16,7 @@ class ProductCategoryController extends Controller
      */
     public function index()
     {
-        //
+        return new ProductCategoryCollection(ProductCategory::all());
     }
 
     /**
