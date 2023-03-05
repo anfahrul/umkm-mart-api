@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\MerchantController;
 use App\Http\Controllers\Api\V1\ProductController;
+use App\Http\Controllers\Api\V1\ProductCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,5 +60,5 @@ Route::group([
     'prefix' => 'v1',
     'namespace' => 'App\Http\Controllers\Api\V1'
 ], function() {
-    Route::apiResource('product_categories', ProductCategoryController::class);
+    Route::get('product_categories', [ProductCategoryController::class, 'index']);
 });

@@ -28,7 +28,7 @@ class MerchantController extends Controller
      */
     public function index()
     {
-        return new MerchantCollection(Merchant::latest()->get());;
+        return new MerchantCollection(Merchant::latest()->get());
     }
 
     /**
