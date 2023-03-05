@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Merchant;
+use App\Models\ProductCategory;
 use App\Http\Requests\StoreMerchantRequest;
 use App\Http\Requests\UpdateMerchantRequest;
 use App\Http\Controllers\Controller;
@@ -11,6 +12,7 @@ use App\Http\Resources\V1\MerchantProductsResource;
 use App\Http\Resources\V1\MerchantCollection;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Request;
 
 class MerchantController extends Controller
 {
@@ -26,9 +28,28 @@ class MerchantController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new MerchantCollection(Merchant::latest()->get());
+        $productCategoryQuery = $request->query('product-category');
+        if ($productCategoryQuery == null) {
+            return new MerchantCollection(Merchant::latest()->get());
+        } else {
+            $productCategory = ProductCategory::where('slug', $productCategoryQuery)->first();
+            if ($productCategory == null) {
+                return response()->json([
+                    'messages' => 'Product category not found.'
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $merchants = Merchant::where('product_category_id', $productCategory->id)->get();
+            if (count($merchants) == 0) {
+                return response()->json([
+                    'messages' => 'Merchants not found in that category.'
+                ], Response::HTTP_NOT_FOUND);
+            } else {
+                return new MerchantCollection($merchants);
+            }
+        }
     }
 
     /**
