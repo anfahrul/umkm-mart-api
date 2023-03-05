@@ -6,6 +6,8 @@ use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\V1\ProductResource;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends Controller
 {
@@ -36,9 +38,17 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Product $product)
+    public function show($product_id)
     {
-        //
+        $productIsExist = Product::find($product_id);
+        if ($productIsExist === null) {
+            return response()->json([
+                'errors' => 'Product is not found.'
+            ], Response::HTTP_NOT_FOUND);
+        } else {
+            $merchantNew = Product::find($product_id);
+            return new ProductResource($merchantNew);
+        }
     }
 
     /**
