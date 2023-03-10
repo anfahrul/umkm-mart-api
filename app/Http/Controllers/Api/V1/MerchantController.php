@@ -13,6 +13,7 @@ use App\Http\Resources\V1\MerchantCollection;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MerchantController extends Controller
 {
@@ -65,27 +66,45 @@ class MerchantController extends Controller
      */
     public function store(StoreMerchantRequest $request)
     {
-        $merchantIsExist = Merchant::where('user_id', auth()->user()->id)->get();
+        try {
+            $merchantIsExist = Merchant::where('user_id', auth()->user()->id)->get();
 
-        if (count($merchantIsExist) >= 1) {
+            if (count($merchantIsExist) >= 1) {
+                return response()->json([
+                    'errors' => 'Merchant is already exist.'
+                ], Response::HTTP_BAD_REQUEST);
+            } else {
+
+                $logoName = '';
+
+                if (request()->hasFile('logo')){
+                    $logo = $request->file('logo');
+                    $originalLogoName = str_replace( " ", "-", $logo->getClientOriginalName());
+                    $logoName = Str::random(32) . '_' . $originalLogoName;
+
+                    $logo->storeAs('public/merchantsLogo', $logoName);
+                }else{
+                    $logoName = 'default-logo.jpg';
+                }
+
+                return new MerchantResource(
+                    Merchant::create(array_merge([
+                        'name' => $request->name,
+                        'product_category_id' => $request->product_category_id,
+                        'user_id' => auth()->user()->id,
+                        'address' => $request->address,
+                        'operational_time_oneday' => $request->operational_time_oneday,
+                        'logo' => '/storage/merchantsLogo/' . $logoName,
+                        'is_open' => 1,
+                        'description' => $request->description])
+                    )
+                );
+            }
+        } catch (\Exception $e) {
             return response()->json([
-                'errors' => 'Merchant is already exist.'
-            ], Response::HTTP_BAD_REQUEST);
-        } else {
-            return new MerchantResource(
-                Merchant::create(array_merge([
-                    'name' => $request->name,
-                    'product_category_id' => $request->product_category_id,
-                    'user_id' => auth()->user()->id,
-                    'address' => $request->address,
-                    'operational_time_oneday' => $request->operational_time_oneday,
-                    'logo' => $request->logo,
-                    'is_open' => 1,
-                    'description' => $request->description])
-                )
-            );
+                'errors' => 'Something went really wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
     }
 
     /**
