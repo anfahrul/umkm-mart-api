@@ -23,12 +23,12 @@ class UpdateMerchantRequest extends FormRequest
     {
         return [
             'name' => ['required','string'],
-            'product_category_id' => ['required','integer'],
+            'product_category_id' => ['required','string'],
             'address' => ['required','string'],
-            'operational_time_oneday' => ['required','integer'],
-            'logo' => ['required','string'],
-            'is_open' => ['required','integer'],
+            'operational_time_oneday' => ['required','string'],
+            'logo' => ['image','mimes:jpeg,jpg,png,svg','max:2048'],
             'description' => ['required','string'],
+            'is_open' => ['required','string'],
         ];
     }
 }

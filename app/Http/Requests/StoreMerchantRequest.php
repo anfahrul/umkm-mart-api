@@ -23,10 +23,10 @@ class StoreMerchantRequest extends FormRequest
     {
         return [
             'name' => ['required','string'],
-            'product_category_id' => ['required','integer'],
+            'product_category_id' => ['required','string'],
             'address' => ['required','string'],
-            'operational_time_oneday' => ['required','integer'],
-            'logo' => ['required','string'],
+            'operational_time_oneday' => ['required','string'],
+            'logo' => ['required','image','mimes:jpeg,jpg,png,svg','max:2048'],
             'description' => ['required','string'],
         ];
     }
