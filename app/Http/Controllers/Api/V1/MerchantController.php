@@ -184,6 +184,10 @@ class MerchantController extends Controller
                 'errors' => 'Merchant is not found.'
             ], Response::HTTP_NOT_FOUND);
         } else {
+            //delete logo from storage
+            $logoFromDatabase = substr($merchant->logo, 23);
+            Storage::delete('public/merchantsLogo/'.$logoFromDatabase);
+
             $merchant->delete();
 
             return response()->json([
