@@ -143,11 +143,25 @@ class MerchantController extends Controller
                 'errors' => 'Merchant is not found.'
             ], Response::HTTP_NOT_FOUND);
         } else {
+
+            if (request()->hasFile('logo')){
+                $logo = $request->file('logo');
+                $originalLogoName = str_replace( " ", "-", $logo->getClientOriginalName());
+                $logoName = Str::random(32) . '_' . $originalLogoName;
+
+                //delete old logo
+                $logoFromDatabase = substr($merchant->logo, 23);
+                Storage::delete('public/merchantsLogo/'.$logoFromDatabase);
+
+                //store new logo
+                $logo->storeAs('public/merchantsLogo', $logoName);
+                $merchant->logo = '/storage/merchantsLogo/' . $logoName;
+            }
+
             $merchant->name = $request->name;
             $merchant->product_category_id = $request->product_category_id;
             $merchant->address = $request->address;
             $merchant->operational_time_oneday = $request->operational_time_oneday;
-            $merchant->logo = $request->logo;
             $merchant->is_open = $request->is_open;
             $merchant->description = $request->description;
 
