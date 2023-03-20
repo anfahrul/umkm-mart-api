@@ -55,7 +55,8 @@ Route::group([
 ], function() {
     Route::post('products/{merchant_id}', [ProductController::class, 'store']);
     Route::get('products/{product_id}', [ProductController::class, 'show']);
-    Route::put('products/{merchant_id}', [ProductController::class, 'update']);
+    Route::put('products/{product_id}', [ProductController::class, 'update']);
+    Route::delete('products/{product_id}', [ProductController::class, 'destroy']);
 });
 
 // api/v1/products-categories
