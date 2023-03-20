@@ -50,10 +50,12 @@ Route::group([
 
 // api/v1/products
 Route::group([
+    'middleware' => 'api',
     'prefix' => 'v1',
-    'namespace' => 'App\Http\Controllers\Api\V1'
 ], function() {
+    Route::post('products/{merchant_id}', [ProductController::class, 'store']);
     Route::get('products/{product_id}', [ProductController::class, 'show']);
+    Route::put('products/{merchant_id}', [ProductController::class, 'update']);
 });
 
 // api/v1/products-categories
