@@ -123,19 +123,43 @@ class ProductController extends Controller
                 'errors' => 'Product is not found.'
             ], Response::HTTP_NOT_FOUND);
         } else {
+            if (request()->hasFile('images')){
+                // $image = $request->file('image');
+                // $originalImageName = str_replace( " ", "-", $image->getClientOriginalName());
+                // $imageName = Str::random(32) . '_' . $originalImageName;
 
-            if (request()->hasFile('image')){
-                $image = $request->file('image');
-                $originalImageName = str_replace( " ", "-", $image->getClientOriginalName());
-                $imageName = Str::random(32) . '_' . $originalImageName;
+                // //delete old logo
+                // $imageFromDatabase = substr($product->image, 22);
+                // Storage::delete('public/productsLogo/'.$imageFromDatabase);
 
-                //delete old logo
-                $imageFromDatabase = substr($product->image, 22);
-                Storage::delete('public/productsLogo/'.$imageFromDatabase);
+                // //store new logo
+                // $image->storeAs('public/productsLogo', $imageName);
+                // $product->image = '/storage/productsLogo/' . $imageName;
 
-                //store new logo
-                $image->storeAs('public/productsLogo', $imageName);
-                $product->image = '/storage/productsLogo/' . $imageName;
+                $productImages = ProductImage::where('product_id', $product_id)->get();
+
+                foreach ($productImages as $images => $value){
+                    //delete logo from storage
+                    $imageFromDatabase = substr($value->file_path, 22);
+                    Storage::delete('public/productsLogo/'.$imageFromDatabase);
+
+                    // Delete row
+                    $productImageDeleted = ProductImage::find($value->id);
+                    $productImageDeleted->delete();
+                }
+
+                foreach ($request->file("images") as $image) {
+                    $originalImageName = str_replace( " ", "-", $image->getClientOriginalName());
+                    $imageName = Str::random(32) . '_' . $originalImageName;
+
+                    new ProductImageResource(
+                        ProductImage::create([
+                            "product_id" => $product_id,
+                            "file_path" => '/storage/productsLogo/' . $imageName,
+                        ])
+                    );
+                    $image->storeAs('public/productsLogo', $imageName);
+                }
             }
 
             $product->name = $request->name;
