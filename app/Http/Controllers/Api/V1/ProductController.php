@@ -13,6 +13,7 @@ use App\Http\Resources\V1\ProductImageResource;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -160,9 +161,17 @@ class ProductController extends Controller
                 'errors' => 'Product is not found.'
             ], Response::HTTP_NOT_FOUND);
         } else {
-            //delete logo from storage
-            $imageFromDatabase = substr($product->image, 22);
-            Storage::delete('public/productsLogo/'.$imageFromDatabase);
+            $productImages = ProductImage::where('product_id', $product_id)->get();
+
+            foreach ($productImages as $images => $value){
+                //delete logo from storage
+                $imageFromDatabase = substr($value->file_path, 22);
+                Storage::delete('public/productsLogo/'.$imageFromDatabase);
+
+                // Delete row
+                $productImageDeleted = ProductImage::find($value->id);
+                $productImageDeleted->delete();
+            }
 
             $product->delete();
 
