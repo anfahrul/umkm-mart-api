@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\MerchantController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ProductCategoryController;
+use App\Http\Controllers\Api\V1\ProductImageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,6 +58,7 @@ Route::group([
     Route::get('products/{product_id}', [ProductController::class, 'show']);
     Route::put('products/{product_id}', [ProductController::class, 'update']);
     Route::delete('products/{product_id}', [ProductController::class, 'destroy']);
+    Route::post('products/{product_id}/images/add', [ProductImageController::class, 'store']);
 });
 
 // api/v1/products-categories
