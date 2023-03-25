@@ -20,7 +20,7 @@ class ProductResource extends JsonResource
             'merchantID' => Product::find($this->product_id)->merchant->merchant_id,
             'name' => $this->name,
             'price' => $this->price,
-            'image' => $this->image,
+            'images' => ProductImageResource::collection(Product::find($this->product_id)->productImage),
             'description' => $this->description,
             'productCategory' => Product::find($this->product_id)->productCategory->name,
             'isAvailable' => $this->is_available,

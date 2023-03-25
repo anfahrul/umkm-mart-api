@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId("product_category_id");
             $table->string("name");
             $table->integer("price");
-            $table->string("image");
             $table->longText("description");
             $table->boolean("is_available");
             $table->timestamps();

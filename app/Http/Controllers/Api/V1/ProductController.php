@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\Merchant;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\ProductResource;
+use App\Http\Resources\V1\ProductImageResource;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -45,6 +47,7 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request, $merchant_id)
     {
         $merchntasIsNotExist = Merchant::find($merchant_id);
+        $product;
 
         if ($merchntasIsNotExist === null) {
             return response()->json([
@@ -53,30 +56,34 @@ class ProductController extends Controller
         } else {
             $merchantNew = Merchant::find($merchant_id);
 
-            $imageName = '';
-
-            if (request()->hasFile('image')){
-                $logo = $request->file('image');
-                $originalImageName = str_replace( " ", "-", $logo->getClientOriginalName());
-                $imageName = Str::random(32) . '_' . $originalImageName;
-
-                $logo->storeAs('public/productsLogo', $imageName);
-            }else{
-                $imageName = 'default-logo.jpg';
-            }
-
-            return new ProductResource(
+            $product = new ProductResource(
                 Product::create(array_merge([
                     'merchant_id' => $merchant_id,
                     'name' => $request->name,
                     'price' => $request->price,
                     'description' => $request->description,
                     'product_category_id' => $request->product_category_id,
-                    'image' => '/storage/productsLogo/' . $imageName,
                     'is_available' => 1])
                 )
             );
+
+            if (request()->hasFile('images')){
+                foreach ($request->file("images") as $image) {
+                    $originalImageName = str_replace( " ", "-", $image->getClientOriginalName());
+                    $imageName = Str::random(32) . '_' . $originalImageName;
+
+                    new ProductImageResource(
+                        ProductImage::create([
+                            "product_id" => $product->product_id,
+                            "file_path" => '/storage/productsLogo/' . $imageName,
+                        ])
+                    );
+                    $image->storeAs('public/productsLogo', $imageName);
+                }
+            }
         }
+
+        return $product;
     }
 
     /**
