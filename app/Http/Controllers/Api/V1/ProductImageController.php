@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Str;
 use App\Http\Resources\V1\ProductImageResource;
+use Illuminate\Support\Facades\Storage;
 
 class ProductImageController extends Controller
 {
@@ -86,8 +87,33 @@ class ProductImageController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ProductImage $productImage)
+    public function destroy($product_id, $product_image_id)
     {
-        //
+        $product = Product::find($product_id);
+
+        if ($product === null) {
+            return response()->json([
+                'errors' => 'Product is not found.'
+            ], Response::HTTP_NOT_FOUND);
+        } else {
+            $productImage = ProductImage::find($product_image_id);
+
+            if ($productImage === null) {
+                return response()->json([
+                    'errors' => 'Product image is not found.'
+                ], Response::HTTP_NOT_FOUND);
+            } else {
+                $productImageRes = ProductImage::find($product_image_id)->first();
+
+                $imageFromDatabase = substr($productImageRes->file_path, 22);
+                Storage::delete('public/productsLogo/'.$imageFromDatabase);
+
+                $productImage->delete();
+
+                return response()->json([
+                    'messages' => 'Product image is deleted successful.'
+                ], Response::HTTP_OK);
+            }
+        }
     }
 }

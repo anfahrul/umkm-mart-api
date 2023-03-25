@@ -59,6 +59,7 @@ Route::group([
     Route::put('products/{product_id}', [ProductController::class, 'update']);
     Route::delete('products/{product_id}', [ProductController::class, 'destroy']);
     Route::post('products/{product_id}/images/add', [ProductImageController::class, 'store']);
+    Route::delete('products/{product_id}/images/delete/{product_image_id}', [ProductImageController::class, 'destroy']);
 });
 
 // api/v1/products-categories
