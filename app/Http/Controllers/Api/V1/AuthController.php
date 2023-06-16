@@ -9,6 +9,7 @@ use App\Http\Resources\V1\UserResource;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Symfony\Component\HttpFoundation\Response;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -28,9 +29,10 @@ class AuthController extends Controller
     public function register(StoreUserRequest $request) {
         return new UserResource(
             User::create(array_merge([
-                'name' => $request->name,
+                'username' => $request->username,
                 'email' => $request->email,
-                'password' => bcrypt($request->password)])
+                'password' => bcrypt($request->password),
+                'registration_at' => Carbon::now()->timestamp]),
             )
         );
     }
@@ -90,7 +92,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
+            'expires_in' => auth()->factory()->getTTL() * 1440,
             'user' => new UserResource(auth()->user())
         ]);
     }

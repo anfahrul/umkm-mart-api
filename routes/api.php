@@ -67,5 +67,6 @@ Route::group([
     'prefix' => 'v1',
     'namespace' => 'App\Http\Controllers\Api\V1'
 ], function() {
+    Route::post('product_categories', [ProductCategoryController::class, 'store']);
     Route::get('product_categories', [ProductCategoryController::class, 'index']);
 });
