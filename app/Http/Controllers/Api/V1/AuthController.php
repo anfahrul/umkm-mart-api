@@ -8,8 +8,10 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Resources\V1\UserResource;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Customer;
 use Symfony\Component\HttpFoundation\Response;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -27,8 +29,15 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function register(StoreUserRequest $request) {
+        $user_id = Str::uuid()->toString();
+
+        Customer::create([
+            'user_id' => $user_id
+        ]);
+
         return new UserResource(
             User::create(array_merge([
+                'id' => $user_id,
                 'username' => $request->username,
                 'email' => $request->email,
                 'password' => bcrypt($request->password),
