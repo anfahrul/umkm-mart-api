@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\MerchantController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ProductCategoryController;
 use App\Http\Controllers\Api\V1\ProductImageController;
+use App\Http\Controllers\Api\V1\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,9 +31,17 @@ Route::group([
 ], function ($router) {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/user-profile', [AuthController::class, 'userProfile']);
+    Route::get('/user-account', [AuthController::class, 'userProfile']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::post('/logout', [AuthController::class, 'logout']);
+});
+
+// api/v1/customer
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'v1/customer'
+], function ($router) {
+    Route::get('/{username}', [CustomerController::class, 'index']);
 });
 
 // api/v1/merchants
