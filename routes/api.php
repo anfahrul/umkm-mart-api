@@ -42,6 +42,7 @@ Route::group([
     'prefix' => 'v1/customer'
 ], function ($router) {
     Route::get('/{username}', [CustomerController::class, 'index']);
+    Route::put('/{username}', [CustomerController::class, 'update']);
 });
 
 // api/v1/merchants
