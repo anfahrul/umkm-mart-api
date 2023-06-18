@@ -18,17 +18,25 @@ class MerchantFactory extends Factory
      */
     public function definition(): array
     {
+        $merchantName = $this->faker->company();
+        $domainWithoutSpace = str_replace( " ", "-", $merchantName);
+        $domain = strtolower($domainWithoutSpace);
+
         return [
             'merchant_id' => $this->faker->uuid(),
-            'name' => $this->faker->company(),
+            'user_id' => User::first()->id,
+            // 'user_id' => $this->faker->unique()->randomElement([1, 2, 3, 4, 5]),
+            'merchant_name' => $merchantName,
             'product_category_id' => ProductCategory::all()->random()->id,
-            // 'user_id' => User::all()->random()->id,
-            'user_id' => $this->faker->unique()->randomElement([1, 2, 3, 4, 5]),
+            'domain' => $domain,
             'address' => $this->faker->address(),
-            'operational_time_oneday' => $this->faker->numberBetween(1, 24),
-            'logo' => '-',
-            'description' => $this->faker->paragraph(),
             'is_open' => $this->faker->randomElement([true, false]),
+            'wa_number' => $this->faker->phoneNumber(),
+            'merchant_website_url' => $this->faker->domainName(),
+            'is_verified' => $this->faker->randomElement([true, false]),
+            'original_logo_url' => '-',
+            'operational_time_oneday' => $this->faker->numberBetween(1, 24),
+            'description' => $this->faker->paragraph(),
         ];
     }
 }

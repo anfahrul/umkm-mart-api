@@ -13,18 +13,19 @@ return new class extends Migration
     {
         Schema::create('merchants', function (Blueprint $table) {
             $table->uuid('merchant_id')->primary();
-            $table->string('name');
+            $table->foreignUuid("user_id")->unique();
+            $table->string('merchant_name');
             $table->foreignId("product_category_id");
-            $table->foreignId("user_id")->unique();
+            $table->string('domain');
             $table->string('address');
-            $table->string('operational_time_oneday');
-            $table->string('logo');
-            $table->longText('description');
             $table->boolean('is_open')->default(1);
+            $table->string('wa_number');
+            $table->string('merchant_website_url')->nullable();
+            $table->string('is_verified')->default(0);
+            $table->string('original_logo_url');
+            $table->string('operational_time_oneday');
+            $table->longText('description');
             $table->timestamps();
-
-            // $table->foreign('product_category_id')->references('id')->on('product_categories');
-            // $table->softDeletes();
         });
     }
 

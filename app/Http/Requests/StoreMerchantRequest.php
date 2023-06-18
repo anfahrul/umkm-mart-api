@@ -22,11 +22,13 @@ class StoreMerchantRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required','string'],
+            'merchant_name' => ['required','string'],
             'product_category_id' => ['required','string'],
             'address' => ['required','string'],
-            'operational_time_oneday' => ['required','string'],
+            'wa_number' => ['required','string'],
+            'merchant_website_url' => ['string'],
             'logo' => ['required','image','mimes:jpeg,jpg,png,svg','max:2048'],
+            'operational_time_oneday' => ['required','string'],
             'description' => ['required','string'],
         ];
     }

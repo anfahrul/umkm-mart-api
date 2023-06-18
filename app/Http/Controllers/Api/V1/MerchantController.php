@@ -87,22 +87,31 @@ class MerchantController extends Controller
                     $logoName = 'default-logo.jpg';
                 }
 
+                $merchantName = $request->merchant_name;
+                $domainWithoutSpace = str_replace( " ", "-", $merchantName);
+                $domain = strtolower($domainWithoutSpace);
+
                 return new MerchantResource(
                     Merchant::create(array_merge([
-                        'name' => $request->name,
-                        'product_category_id' => $request->product_category_id,
                         'user_id' => auth()->user()->id,
+                        'merchant_name' => $merchantName,
+                        'product_category_id' => $request->product_category_id,
+                        'domain' => $domain,
                         'address' => $request->address,
-                        'operational_time_oneday' => $request->operational_time_oneday,
-                        'logo' => '/storage/merchantsLogo/' . $logoName,
                         'is_open' => 1,
+                        'wa_number' => $request->wa_number,
+                        'merchant_website_url' => $request->merchant_website_url,
+                        'is_verified' => 0,
+                        'original_logo_url' => '/storage/merchantsLogo/' . $logoName,
+                        'operational_time_oneday' => $request->operational_time_oneday,
                         'description' => $request->description])
                     )
                 );
             }
         } catch (\Exception $e) {
             return response()->json([
-                'errors' => 'Something went really wrong!'
+                // 'errors' => 'Something went really wrong!'
+                'errors' => $e
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
