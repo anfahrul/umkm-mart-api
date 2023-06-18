@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Merchant;
 use App\Models\ProductCategory;
+use App\Models\Product;
 use App\Http\Requests\StoreMerchantRequest;
 use App\Http\Requests\UpdateMerchantRequest;
 use App\Http\Controllers\Controller;
@@ -193,8 +194,15 @@ class MerchantController extends Controller
                 'errors' => 'Merchant is not found.'
             ], Response::HTTP_NOT_FOUND);
         } else {
+            $products = Product::where('merchant_id', $merchant_id)->get();
+            if (count($products) > 0) {
+                return response()->json([
+                    'messages' => "Delete all owned products before deleting the merchant"
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
             //delete logo from storage
-            $logoFromDatabase = substr($merchant->logo, 23);
+            $logoFromDatabase = substr($merchant->original_logo_url, 23);
             Storage::delete('public/merchantsLogo/'.$logoFromDatabase);
 
             $merchant->delete();
