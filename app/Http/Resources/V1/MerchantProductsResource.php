@@ -17,13 +17,18 @@ class MerchantProductsResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'merchantID' => $this->merchant_id,
-            'name' => $this->name,
+            'merchant_id' => $this->merchant_id,
+            'user_id' => $this->user_id,
+            'merchant_name' => $this->merchant_name,
             'merchantCategory' => Merchant::find($this->merchant_id)->productCategory->name,
+            'domain' => $this->domain,
             'address' => $this->address,
+            'is_open' => $this->is_open,
+            'wa_number' => $this->wa_number,
+            'merchant_website_url' => $this->merchant_website_url,
+            'is_verified' => $this->is_verified,
+            'logo' => $this->original_logo_url,
             'operationalTimeInOneDay' => $this->operational_time_oneday,
-            'isOpen' => $this->is_open,
-            'logo' => $this->logo,
             'description' => $this->description,
             'products' => ProductResource::collection(Merchant::find($this->merchant_id)->products),
             'createdAt' => $this->created_at,

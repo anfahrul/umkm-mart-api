@@ -16,14 +16,14 @@ class ProductResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'productID' => $this->product_id,
-            'merchantID' => Product::find($this->product_id)->merchant->merchant_id,
+            'product_id' => $this->product_id,
+            'merchant_id' => Product::find($this->product_id)->merchant->merchant_id,
             'name' => $this->name,
             'price' => $this->price,
             'images' => ProductImageResource::collection(Product::find($this->product_id)->productImage),
             'description' => $this->description,
-            'productCategory' => Product::find($this->product_id)->productCategory->name,
-            'isAvailable' => $this->is_available,
+            'product_category' => Product::find($this->product_id)->productCategory->name,
+            'is_available' => $this->is_available,
         ];
     }
 }

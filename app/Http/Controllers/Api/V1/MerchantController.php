@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Merchant;
 use App\Models\ProductCategory;
+use App\Models\Product;
 use App\Http\Requests\StoreMerchantRequest;
 use App\Http\Requests\UpdateMerchantRequest;
 use App\Http\Controllers\Controller;
@@ -66,6 +67,13 @@ class MerchantController extends Controller
      */
     public function store(StoreMerchantRequest $request)
     {
+        $merchantIsExist = Merchant::where('merchant_name', $request->merchant_name)->get();
+        if (count($merchantIsExist) > 0) {
+            return response()->json([
+                'errors' => 'Merchant with this name is already exist. Please change the name!'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
         try {
             $merchantIsExist = Merchant::where('user_id', auth()->user()->id)->get();
 
@@ -74,7 +82,6 @@ class MerchantController extends Controller
                     'errors' => 'Merchant is already exist.'
                 ], Response::HTTP_BAD_REQUEST);
             } else {
-
                 $logoName = '';
 
                 if (request()->hasFile('logo')){
@@ -87,15 +94,23 @@ class MerchantController extends Controller
                     $logoName = 'default-logo.jpg';
                 }
 
+                $merchantName = $request->merchant_name;
+                $domainWithoutSpace = str_replace( " ", "-", $merchantName);
+                $domain = strtolower($domainWithoutSpace);
+
                 return new MerchantResource(
                     Merchant::create(array_merge([
-                        'name' => $request->name,
-                        'product_category_id' => $request->product_category_id,
                         'user_id' => auth()->user()->id,
+                        'merchant_name' => $merchantName,
+                        'product_category_id' => $request->product_category_id,
+                        'domain' => $domain,
                         'address' => $request->address,
-                        'operational_time_oneday' => $request->operational_time_oneday,
-                        'logo' => '/storage/merchantsLogo/' . $logoName,
                         'is_open' => 1,
+                        'wa_number' => $request->wa_number,
+                        'merchant_website_url' => $request->merchant_website_url,
+                        'is_verified' => 0,
+                        'original_logo_url' => '/storage/merchantsLogo/' . $logoName,
+                        'operational_time_oneday' => $request->operational_time_oneday,
                         'description' => $request->description])
                     )
                 );
@@ -103,6 +118,7 @@ class MerchantController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'errors' => 'Something went really wrong!'
+                // 'errors' => $e
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -150,26 +166,41 @@ class MerchantController extends Controller
                 $logoName = Str::random(32) . '_' . $originalLogoName;
 
                 //delete old logo
-                $logoFromDatabase = substr($merchant->logo, 23);
+                $logoFromDatabase = substr($merchant->original_logo_url, 23);
                 Storage::delete('public/merchantsLogo/'.$logoFromDatabase);
 
                 //store new logo
                 $logo->storeAs('public/merchantsLogo', $logoName);
-                $merchant->logo = '/storage/merchantsLogo/' . $logoName;
+                $merchant->original_logo_url = '/storage/merchantsLogo/' . $logoName;
             }
 
-            $merchant->name = $request->name;
+            if (request()->has('merchant_name')){
+                $merchantIsExist = Merchant::where('merchant_name', $request->merchant_name)->get();
+                if (count($merchantIsExist) > 0) {
+                    return response()->json([
+                        'errors' => 'Merchant with this name is already exist. Please change the name!'
+                    ], Response::HTTP_BAD_REQUEST);
+                } else {
+                    $merchantName = $request->merchant_name;
+                    $domainWithoutSpace = str_replace( " ", "-", $merchantName);
+                    $domain = strtolower($domainWithoutSpace);
+
+                    $merchant->merchant_name = $merchantName;
+                    $merchant->domain = $domain;
+                }
+            }
+
             $merchant->product_category_id = $request->product_category_id;
             $merchant->address = $request->address;
-            $merchant->operational_time_oneday = $request->operational_time_oneday;
             $merchant->is_open = $request->is_open;
+            $merchant->wa_number = $request->wa_number;
+            $merchant->merchant_website_url = $request->merchant_website_url;
+            $merchant->operational_time_oneday = $request->operational_time_oneday;
             $merchant->description = $request->description;
 
             $merchant->save();
             return new MerchantResource($merchant);
         }
-
-
     }
 
     /**
@@ -184,8 +215,15 @@ class MerchantController extends Controller
                 'errors' => 'Merchant is not found.'
             ], Response::HTTP_NOT_FOUND);
         } else {
+            $products = Product::where('merchant_id', $merchant_id)->get();
+            if (count($products) > 0) {
+                return response()->json([
+                    'messages' => "Delete all owned products before deleting the merchant"
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
             //delete logo from storage
-            $logoFromDatabase = substr($merchant->logo, 23);
+            $logoFromDatabase = substr($merchant->original_logo_url, 23);
             Storage::delete('public/merchantsLogo/'.$logoFromDatabase);
 
             $merchant->delete();

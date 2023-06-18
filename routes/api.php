@@ -49,7 +49,6 @@ Route::group([
 Route::group([
     'middleware' => 'api',
     'prefix' => 'v1',
-    // 'namespace' => 'App\Http\Controllers\Api\V1'
 ], function() {
     Route::post('merchants', [MerchantController::class, 'store']);
     Route::get('merchants', [MerchantController::class, 'index']);
