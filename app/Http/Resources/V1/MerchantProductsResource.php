@@ -5,6 +5,7 @@ namespace App\Http\Resources\V1;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Models\Merchant;
+use App\Models\UmkmCategory;
 use App\Http\Resources\V1\ProductResource;
 
 class MerchantProductsResource extends JsonResource
@@ -20,7 +21,7 @@ class MerchantProductsResource extends JsonResource
             'merchant_id' => $this->merchant_id,
             'user_id' => $this->user_id,
             'merchant_name' => $this->merchant_name,
-            'merchantCategory' => Merchant::find($this->merchant_id)->productCategory->name,
+            'merchantCategory' => new UmkmCategoryResource(UmkmCategory::find($this->umkm_category_id)),
             'domain' => $this->domain,
             'address' => $this->address,
             'is_open' => $this->is_open,

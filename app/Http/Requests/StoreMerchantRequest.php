@@ -23,7 +23,7 @@ class StoreMerchantRequest extends FormRequest
     {
         return [
             'merchant_name' => ['required','string'],
-            'product_category_id' => ['required','string'],
+            'umkm_category_id' => ['required','string'],
             'address' => ['required','string'],
             'wa_number' => ['required','string'],
             'merchant_website_url' => ['string'],
