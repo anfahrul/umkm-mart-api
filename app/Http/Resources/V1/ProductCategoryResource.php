@@ -15,7 +15,7 @@ class ProductCategoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'categoryID' => $this->id,
+            'product_category_id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
         ];

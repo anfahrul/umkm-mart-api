@@ -64,6 +64,7 @@ Route::group([
     'prefix' => 'v1',
 ], function() {
     Route::post('products/{merchant_id}', [ProductController::class, 'store']);
+    Route::get('products', [ProductController::class, 'index']);
     Route::get('products/{product_id}', [ProductController::class, 'show']);
     Route::put('products/{product_id}', [ProductController::class, 'update']);
     Route::delete('products/{product_id}', [ProductController::class, 'destroy']);

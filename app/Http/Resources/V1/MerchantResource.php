@@ -26,7 +26,7 @@ class MerchantResource extends JsonResource
             'address' => $this->address,
             'is_open' => $this->is_open,
             'wa_number' => $this->wa_number,
-            'merchant_website_url' => $this->merchant_website_url,
+            'merchant_website_path' => $this->merchant_website_url,
             'is_verified' => $this->is_verified,
             'logo' => $this->original_logo_url,
             'operational_time_oneday' => $this->operational_time_oneday,

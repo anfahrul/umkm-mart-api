@@ -15,7 +15,7 @@ class ProductImageResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'product_image_id' => $this->id,
+            // 'product_image_id' => $this->id,
             'file_path' => $this->file_path,
         ];
     }

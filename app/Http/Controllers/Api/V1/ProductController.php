@@ -14,6 +14,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use App\Http\Resources\V1\ProductCollection;
+use App\Models\ProductCategory;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -23,15 +26,34 @@ class ProductController extends Controller
      * @return void
      */
     public function __construct() {
-        $this->middleware('auth:api', ['except' => ['show']]);
+        $this->middleware('auth:api', ['except' => ['index', 'show']]);
     }
 
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $productCategoryQuery = $request->query('product-category-slug');
+        if ($productCategoryQuery == null) {
+            return new ProductCollection(Product::latest()->get());
+        } else {
+            $productCategory = ProductCategory::where('slug', $productCategoryQuery)->first();
+            if ($productCategory == null) {
+                return response()->json([
+                    'messages' => 'Product category not found.'
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $merchants = Product::where('product_category_id', $productCategory->id)->get();
+            if (count($merchants) == 0) {
+                return response()->json([
+                    'messages' => 'Merchants not found in that category.'
+                ], Response::HTTP_NOT_FOUND);
+            } else {
+                return new MerchantCollection($merchants);
+            }
+        }
     }
 
     /**
