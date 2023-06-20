@@ -10,7 +10,8 @@ use App\Http\Requests\StoreMerchantRequest;
 use App\Http\Requests\UpdateMerchantRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\MerchantResource;
-use App\Http\Resources\V1\MerchantProductsResource;
+use App\Http\Resources\V1\MerchantStoreResponseResource;
+use App\Http\Resources\V1\MerchantUpdateResponseResource;
 use App\Http\Resources\V1\MerchantCollection;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
@@ -133,7 +134,7 @@ class MerchantController extends ApiController
 
             return $this->successResponse(
                 Response::HTTP_OK . " OK",
-                new MerchantResource($merchant),
+                new MerchantStoreResponseResource($merchant),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
@@ -183,9 +184,11 @@ class MerchantController extends ApiController
         $merchant = Merchant::find($merchant_id);
 
         if ($merchant === null) {
-            return response()->json([
-                'errors' => 'Merchant is not found.'
-            ], Response::HTTP_NOT_FOUND);
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                'Merchant with id ' . $merchant_id . ' is not found',
+                Response::HTTP_NOT_FOUND
+            );
         } else {
 
             if (request()->hasFile('logo')){
@@ -205,9 +208,11 @@ class MerchantController extends ApiController
             if (request()->has('merchant_name')){
                 $merchantIsExist = Merchant::where('merchant_name', $request->merchant_name)->get();
                 if (count($merchantIsExist) > 0) {
-                    return response()->json([
-                        'errors' => 'Merchant with this name is already exist. Please change the name!'
-                    ], Response::HTTP_BAD_REQUEST);
+                    return $this->errorResponse(
+                        Response::HTTP_BAD_REQUEST . " Bad Request",
+                        'Name ' . $request->merchant_name . ' is already in use. Please change the name',
+                        Response::HTTP_BAD_REQUEST
+                    );
                 } else {
                     $merchantName = $request->merchant_name;
                     $domainWithoutSpace = str_replace( " ", "-", $merchantName);
@@ -227,7 +232,12 @@ class MerchantController extends ApiController
             $merchant->description = $request->description;
 
             $merchant->save();
-            return new MerchantResource($merchant);
+
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new MerchantUpdateResponseResource($merchant),
+                Response::HTTP_OK
+            );
         }
     }
 
