@@ -93,8 +93,16 @@ class AuthController extends ApiController
      * @return \Illuminate\Http\JsonResponse
      */
     public function logout() {
-        auth()->logout();
-        return response()->json(['message' => 'User successfully signed out.']);
+        $user_id = auth()->user()->id;
+
+        if ($user_id != null) {
+            auth()->logout();
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                "User " . $user_id . " successfully signed out",
+                Response::HTTP_OK
+            );
+        }
     }
 
     /**
