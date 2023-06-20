@@ -83,16 +83,20 @@ class MerchantController extends ApiController
     {
         $merchantIsExist = Merchant::where('user_id', auth()->user()->id)->get();
         if (count($merchantIsExist) >= 1) {
-            return response()->json([
-                'errors' => 'Your merchant is already exist.'
-            ], Response::HTTP_BAD_REQUEST);
+            return $this->errorResponse(
+                Response::HTTP_BAD_REQUEST . " Bad Request",
+                'Your merchant is already exist',
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         $merchantIsExist = Merchant::where('merchant_name', $request->merchant_name)->get();
         if (count($merchantIsExist) > 0) {
-            return response()->json([
-                'errors' => 'Merchant with this name is already exist. Please change the name!'
-            ], Response::HTTP_BAD_REQUEST);
+            return $this->errorResponse(
+                Response::HTTP_BAD_REQUEST . " Bad Request",
+                'Name ' . $request->merchant_name . ' is already in use. Please change the name',
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         try {
@@ -112,21 +116,25 @@ class MerchantController extends ApiController
             $domainWithoutSpace = str_replace( " ", "-", $merchantName);
             $domain = strtolower($domainWithoutSpace);
 
-            return new MerchantResource(
-                Merchant::create(array_merge([
-                    'user_id' => auth()->user()->id,
-                    'merchant_name' => $merchantName,
-                    'umkm_category_id' => $request->umkm_category_id,
-                    'domain' => $domain,
-                    'address' => $request->address,
-                    'is_open' => 1,
-                    'wa_number' => $request->wa_number,
-                    'merchant_website_url' => $request->merchant_website_url,
-                    'is_verified' => 0,
-                    'original_logo_url' => '/storage/merchantsLogo/' . $logoName,
-                    'operational_time_oneday' => $request->operational_time_oneday,
-                    'description' => $request->description])
-                )
+            $merchant = Merchant::create(array_merge([
+                'user_id' => auth()->user()->id,
+                'merchant_name' => $merchantName,
+                'umkm_category_id' => $request->umkm_category_id,
+                'domain' => $domain,
+                'address' => $request->address,
+                'is_open' => 1,
+                'wa_number' => $request->wa_number,
+                'merchant_website_url' => $request->merchant_website_url,
+                'is_verified' => 0,
+                'original_logo_url' => '/storage/merchantsLogo/' . $logoName,
+                'operational_time_oneday' => $request->operational_time_oneday,
+                'description' => $request->description])
+            );
+
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new MerchantResource($merchant),
+                Response::HTTP_OK
             );
         } catch (\Exception $e) {
             return response()->json([

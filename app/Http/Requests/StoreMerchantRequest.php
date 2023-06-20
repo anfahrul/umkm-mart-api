@@ -3,6 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
 
 class StoreMerchantRequest extends FormRequest
 {
@@ -27,9 +30,23 @@ class StoreMerchantRequest extends FormRequest
             'address' => ['required','string'],
             'wa_number' => ['required','string'],
             'merchant_website_url' => ['string'],
-            'logo' => ['required','image','mimes:jpeg,jpg,png,svg','max:2048'],
+            'logo' => ['mimes:jpeg,jpg,png,svg','max:2048'],
             'operational_time_oneday' => ['required','string'],
             'description' => ['required','string'],
         ];
+    }
+
+    public function failedValidation(Validator $validator)
+    {
+        $errors = $validator->errors();
+
+        throw new HttpResponseException(
+            response()->json([
+                'status'=> Response::HTTP_UNPROCESSABLE_ENTITY  . " Unprocessable Content",
+                'message' => "Your request failed to process",
+                'errors' => $errors,
+                'data' => null
+            ], Response::HTTP_UNPROCESSABLE_ENTITY)
+        );
     }
 }
