@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\MerchantResource;
 use App\Http\Resources\V1\MerchantStoreResponseResource;
 use App\Http\Resources\V1\MerchantUpdateResponseResource;
+use App\Http\Resources\V1\MerchantDeleteResponseResource;
 use App\Http\Resources\V1\MerchantCollection;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
@@ -249,15 +250,23 @@ class MerchantController extends ApiController
         $merchant = Merchant::find($merchant_id);
 
         if ($merchant === null) {
-            return response()->json([
-                'errors' => 'Merchant is not found.'
-            ], Response::HTTP_NOT_FOUND);
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                "Merchant with id " . $merchant_id . " is not found",
+                Response::HTTP_NOT_FOUND
+            );
         } else {
             $products = Product::where('merchant_id', $merchant_id)->get();
             if (count($products) > 0) {
                 return response()->json([
                     'messages' => "Delete all owned products before deleting the merchant"
                 ], Response::HTTP_BAD_REQUEST);
+
+                return $this->errorResponse(
+                    Response::HTTP_BAD_REQUEST . " Bad Request",
+                    "Delete all owned products before deleting the merchant",
+                    Response::HTTP_BAD_REQUEST
+                );
             }
 
             //delete logo from storage
@@ -266,9 +275,11 @@ class MerchantController extends ApiController
 
             $merchant->delete();
 
-            return response()->json([
-                'messages' => 'Merchant is deleted successful.'
-            ], Response::HTTP_OK);
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new MerchantDeleteResponseResource($merchant),
+                Response::HTTP_OK
+            );
         }
     }
 }
