@@ -16,8 +16,9 @@ use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Api\V1\ApiController;
 
-class MerchantController extends Controller
+class MerchantController extends ApiController
 {
     /**
      * Create a new AuthController instance.
@@ -35,22 +36,34 @@ class MerchantController extends Controller
     {
         $umkmCategoryQuery = $request->query('umkm-category-slug');
         if ($umkmCategoryQuery == null) {
-            return new MerchantCollection(Merchant::latest()->get());
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new MerchantCollection(Merchant::latest()->get()),
+                Response::HTTP_OK
+            );
         } else {
             $umkmCategory = UmkmCategory::where('slug', $umkmCategoryQuery)->first();
             if ($umkmCategory == null) {
-                return response()->json([
-                    'messages' => 'Umkm category not found.'
-                ], Response::HTTP_NOT_FOUND);
+                return $this->errorResponse(
+                    Response::HTTP_NOT_FOUND . " Not Found",
+                    "Category " . $umkmCategoryQuery . " is not found",
+                    Response::HTTP_NOT_FOUND
+                );
             }
 
             $merchants = Merchant::where('umkm_category_id', $umkmCategory->id)->get();
             if (count($merchants) == 0) {
-                return response()->json([
-                    'messages' => 'Merchants not found in that category.'
-                ], Response::HTTP_NOT_FOUND);
+                return $this->successResponse(
+                    Response::HTTP_NOT_FOUND . " Not Found",
+                    null,
+                    Response::HTTP_NOT_FOUND
+                );
             } else {
-                return new MerchantCollection($merchants);
+                return $this->successResponse(
+                    Response::HTTP_OK . " OK",
+                    new MerchantCollection($merchants),
+                    Response::HTTP_OK
+                );
             }
         }
     }
@@ -130,12 +143,19 @@ class MerchantController extends Controller
     {
         $merchantIsExist = Merchant::find($merchant_id);
         if ($merchantIsExist === null) {
-            return response()->json([
-                'errors' => 'Merchant is not found.'
-            ], Response::HTTP_NOT_FOUND);
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                "Merchant with id " . $merchant_id . " is not found",
+                Response::HTTP_NOT_FOUND
+            );
         } else {
             $merchantNew = Merchant::find($merchant_id);
-            return new MerchantProductsResource($merchantNew);
+
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new MerchantProductsResource($merchantNew),
+                Response::HTTP_OK
+            );
         }
     }
 
