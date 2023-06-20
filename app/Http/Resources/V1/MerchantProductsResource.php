@@ -21,7 +21,7 @@ class MerchantProductsResource extends JsonResource
             'merchant_id' => $this->merchant_id,
             'user_id' => $this->user_id,
             'merchant_name' => $this->merchant_name,
-            'merchantCategory' => new UmkmCategoryResource(UmkmCategory::find($this->umkm_category_id)),
+            'merchant_category' => new UmkmCategoryResource(UmkmCategory::find($this->umkm_category_id)),
             'domain' => $this->domain,
             'address' => $this->address,
             'is_open' => $this->is_open,
@@ -29,11 +29,11 @@ class MerchantProductsResource extends JsonResource
             'merchant_website_url' => $this->merchant_website_url,
             'is_verified' => $this->is_verified,
             'logo' => $this->original_logo_url,
-            'operationalTimeInOneDay' => $this->operational_time_oneday,
+            'operational_time_oneday' => $this->operational_time_oneday,
             'description' => $this->description,
             'products' => ProductResource::collection(Merchant::find($this->merchant_id)->products),
-            'createdAt' => $this->created_at,
-            'updatedAt' => $this->updated_at,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

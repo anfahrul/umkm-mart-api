@@ -11,13 +11,17 @@ use App\Http\Requests\UpdateMerchantRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\MerchantResource;
 use App\Http\Resources\V1\MerchantProductsResource;
+use App\Http\Resources\V1\MerchantStoreResponseResource;
+use App\Http\Resources\V1\MerchantUpdateResponseResource;
+use App\Http\Resources\V1\MerchantDeleteResponseResource;
 use App\Http\Resources\V1\MerchantCollection;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Api\V1\ApiController;
 
-class MerchantController extends Controller
+class MerchantController extends ApiController
 {
     /**
      * Create a new AuthController instance.
@@ -25,7 +29,7 @@ class MerchantController extends Controller
      * @return void
      */
     public function __construct() {
-        $this->middleware('auth:api', ['except' => ['index', 'show']]);
+        $this->middleware('auth:api', ['except' => ['index', 'show', 'showByDomain']]);
     }
 
     /**
@@ -35,22 +39,34 @@ class MerchantController extends Controller
     {
         $umkmCategoryQuery = $request->query('umkm-category-slug');
         if ($umkmCategoryQuery == null) {
-            return new MerchantCollection(Merchant::latest()->get());
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new MerchantCollection(Merchant::latest()->get()),
+                Response::HTTP_OK
+            );
         } else {
             $umkmCategory = UmkmCategory::where('slug', $umkmCategoryQuery)->first();
             if ($umkmCategory == null) {
-                return response()->json([
-                    'messages' => 'Umkm category not found.'
-                ], Response::HTTP_NOT_FOUND);
+                return $this->errorResponse(
+                    Response::HTTP_NOT_FOUND . " Not Found",
+                    "Category " . $umkmCategoryQuery . " is not found",
+                    Response::HTTP_NOT_FOUND
+                );
             }
 
             $merchants = Merchant::where('umkm_category_id', $umkmCategory->id)->get();
             if (count($merchants) == 0) {
-                return response()->json([
-                    'messages' => 'Merchants not found in that category.'
-                ], Response::HTTP_NOT_FOUND);
+                return $this->successResponse(
+                    Response::HTTP_NOT_FOUND . " Not Found",
+                    null,
+                    Response::HTTP_NOT_FOUND
+                );
             } else {
-                return new MerchantCollection($merchants);
+                return $this->successResponse(
+                    Response::HTTP_OK . " OK",
+                    new MerchantCollection($merchants),
+                    Response::HTTP_OK
+                );
             }
         }
     }
@@ -70,16 +86,20 @@ class MerchantController extends Controller
     {
         $merchantIsExist = Merchant::where('user_id', auth()->user()->id)->get();
         if (count($merchantIsExist) >= 1) {
-            return response()->json([
-                'errors' => 'Your merchant is already exist.'
-            ], Response::HTTP_BAD_REQUEST);
+            return $this->errorResponse(
+                Response::HTTP_BAD_REQUEST . " Bad Request",
+                'Your merchant is already exist',
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         $merchantIsExist = Merchant::where('merchant_name', $request->merchant_name)->get();
         if (count($merchantIsExist) > 0) {
-            return response()->json([
-                'errors' => 'Merchant with this name is already exist. Please change the name!'
-            ], Response::HTTP_BAD_REQUEST);
+            return $this->errorResponse(
+                Response::HTTP_BAD_REQUEST . " Bad Request",
+                'Name ' . $request->merchant_name . ' is already in use. Please change the name',
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         try {
@@ -99,21 +119,25 @@ class MerchantController extends Controller
             $domainWithoutSpace = str_replace( " ", "-", $merchantName);
             $domain = strtolower($domainWithoutSpace);
 
-            return new MerchantResource(
-                Merchant::create(array_merge([
-                    'user_id' => auth()->user()->id,
-                    'merchant_name' => $merchantName,
-                    'umkm_category_id' => $request->umkm_category_id,
-                    'domain' => $domain,
-                    'address' => $request->address,
-                    'is_open' => 1,
-                    'wa_number' => $request->wa_number,
-                    'merchant_website_url' => $request->merchant_website_url,
-                    'is_verified' => 0,
-                    'original_logo_url' => '/storage/merchantsLogo/' . $logoName,
-                    'operational_time_oneday' => $request->operational_time_oneday,
-                    'description' => $request->description])
-                )
+            $merchant = Merchant::create(array_merge([
+                'user_id' => auth()->user()->id,
+                'merchant_name' => $merchantName,
+                'umkm_category_id' => $request->umkm_category_id,
+                'domain' => $domain,
+                'address' => $request->address,
+                'is_open' => 1,
+                'wa_number' => $request->wa_number,
+                'merchant_website_url' => $request->merchant_website_url,
+                'is_verified' => 0,
+                'original_logo_url' => '/storage/merchantsLogo/' . $logoName,
+                'operational_time_oneday' => $request->operational_time_oneday,
+                'description' => $request->description])
+            );
+
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new MerchantStoreResponseResource($merchant),
+                Response::HTTP_OK
             );
         } catch (\Exception $e) {
             return response()->json([
@@ -130,12 +154,40 @@ class MerchantController extends Controller
     {
         $merchantIsExist = Merchant::find($merchant_id);
         if ($merchantIsExist === null) {
-            return response()->json([
-                'errors' => 'Merchant is not found.'
-            ], Response::HTTP_NOT_FOUND);
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                "Merchant with id " . $merchant_id . " is not found",
+                Response::HTTP_NOT_FOUND
+            );
         } else {
             $merchantNew = Merchant::find($merchant_id);
-            return new MerchantProductsResource($merchantNew);
+
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new MerchantProductsResource($merchantNew),
+                Response::HTTP_OK
+            );
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function showByDomain($domain)
+    {
+        $merchant = Merchant::where('domain', $domain)->first();
+        if ($merchant === null) {
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                "Merchant with domain " . $domain . " is not found",
+                Response::HTTP_NOT_FOUND
+            );
+        } else {
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new MerchantProductsResource($merchant),
+                Response::HTTP_OK
+            );
         }
     }
 
@@ -155,9 +207,11 @@ class MerchantController extends Controller
         $merchant = Merchant::find($merchant_id);
 
         if ($merchant === null) {
-            return response()->json([
-                'errors' => 'Merchant is not found.'
-            ], Response::HTTP_NOT_FOUND);
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                'Merchant with id ' . $merchant_id . ' is not found',
+                Response::HTTP_NOT_FOUND
+            );
         } else {
 
             if (request()->hasFile('logo')){
@@ -177,9 +231,11 @@ class MerchantController extends Controller
             if (request()->has('merchant_name')){
                 $merchantIsExist = Merchant::where('merchant_name', $request->merchant_name)->get();
                 if (count($merchantIsExist) > 0) {
-                    return response()->json([
-                        'errors' => 'Merchant with this name is already exist. Please change the name!'
-                    ], Response::HTTP_BAD_REQUEST);
+                    return $this->errorResponse(
+                        Response::HTTP_BAD_REQUEST . " Bad Request",
+                        'Name ' . $request->merchant_name . ' is already in use. Please change the name',
+                        Response::HTTP_BAD_REQUEST
+                    );
                 } else {
                     $merchantName = $request->merchant_name;
                     $domainWithoutSpace = str_replace( " ", "-", $merchantName);
@@ -199,7 +255,12 @@ class MerchantController extends Controller
             $merchant->description = $request->description;
 
             $merchant->save();
-            return new MerchantResource($merchant);
+
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new MerchantUpdateResponseResource($merchant),
+                Response::HTTP_OK
+            );
         }
     }
 
@@ -211,15 +272,23 @@ class MerchantController extends Controller
         $merchant = Merchant::find($merchant_id);
 
         if ($merchant === null) {
-            return response()->json([
-                'errors' => 'Merchant is not found.'
-            ], Response::HTTP_NOT_FOUND);
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                "Merchant with id " . $merchant_id . " is not found",
+                Response::HTTP_NOT_FOUND
+            );
         } else {
             $products = Product::where('merchant_id', $merchant_id)->get();
             if (count($products) > 0) {
                 return response()->json([
                     'messages' => "Delete all owned products before deleting the merchant"
                 ], Response::HTTP_BAD_REQUEST);
+
+                return $this->errorResponse(
+                    Response::HTTP_BAD_REQUEST . " Bad Request",
+                    "Delete all owned products before deleting the merchant",
+                    Response::HTTP_BAD_REQUEST
+                );
             }
 
             //delete logo from storage
@@ -228,9 +297,11 @@ class MerchantController extends Controller
 
             $merchant->delete();
 
-            return response()->json([
-                'messages' => 'Merchant is deleted successful.'
-            ], Response::HTTP_OK);
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new MerchantDeleteResponseResource($merchant),
+                Response::HTTP_OK
+            );
         }
     }
 }

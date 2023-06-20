@@ -31,8 +31,8 @@ class MerchantResource extends JsonResource
             'logo' => $this->original_logo_url,
             'operational_time_oneday' => $this->operational_time_oneday,
             'description' => $this->description,
-            'createdAt' => $this->created_at,
-            'updatedAt' => $this->updated_at,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

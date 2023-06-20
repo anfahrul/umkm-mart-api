@@ -22,13 +22,13 @@ class UpdateMerchantRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'merchant_name' => ['required','string'],
-            'umkm_category_id' => ['required','string'],
+            'merchant_name' => ['string'],
+            'umkm_category_id' => ['required','integer'],
             'address' => ['required','string'],
             'is_open' => ['required','boolean'],
             'wa_number' => ['required','string'],
             'merchant_website_url' => ['string'],
-            'operational_time_oneday' => ['required','string'],
+            'operational_time_oneday' => ['required','integer'],
             'logo' => ['image','mimes:jpeg,jpg,png,svg','max:2048'],
             'description' => ['required','string'],
         ];
