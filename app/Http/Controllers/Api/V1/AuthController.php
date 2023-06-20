@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Resources\V1\UserResource;
 use App\Http\Resources\V1\UserStoreResponseResource;
+use App\Http\Resources\V1\UserLoginResponseResource;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Customer;
@@ -104,11 +105,17 @@ class AuthController extends ApiController
      * @return \Illuminate\Http\JsonResponse
      */
     protected function createNewToken($token){
-        return response()->json([
+        $tokenPack = (object)[
+            'user_id' => auth()->user()->id,
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'expires_in' => auth()->factory()->getTTL() * 1440,
-            'user' => new UserResource(auth()->user())
-        ]);
+            'expires_in' => auth()->factory()->getTTL() . " Minutes",
+        ];
+
+        return $this->successResponse(
+            Response::HTTP_OK . " OK",
+            new UserLoginResponseResource($tokenPack),
+            Response::HTTP_OK
+        );
     }
 }
