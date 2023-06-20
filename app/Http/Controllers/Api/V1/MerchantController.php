@@ -10,6 +10,7 @@ use App\Http\Requests\StoreMerchantRequest;
 use App\Http\Requests\UpdateMerchantRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\MerchantResource;
+use App\Http\Resources\V1\MerchantProductsResource;
 use App\Http\Resources\V1\MerchantStoreResponseResource;
 use App\Http\Resources\V1\MerchantUpdateResponseResource;
 use App\Http\Resources\V1\MerchantDeleteResponseResource;
@@ -28,7 +29,7 @@ class MerchantController extends ApiController
      * @return void
      */
     public function __construct() {
-        $this->middleware('auth:api', ['except' => ['index', 'show']]);
+        $this->middleware('auth:api', ['except' => ['index', 'show', 'showByDomain']]);
     }
 
     /**
@@ -164,6 +165,27 @@ class MerchantController extends ApiController
             return $this->successResponse(
                 Response::HTTP_OK . " OK",
                 new MerchantProductsResource($merchantNew),
+                Response::HTTP_OK
+            );
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function showByDomain($domain)
+    {
+        $merchant = Merchant::where('domain', $domain)->first();
+        if ($merchant === null) {
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                "Merchant with domain " . $domain . " is not found",
+                Response::HTTP_NOT_FOUND
+            );
+        } else {
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new MerchantProductsResource($merchant),
                 Response::HTTP_OK
             );
         }
