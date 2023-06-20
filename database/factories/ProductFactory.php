@@ -21,13 +21,13 @@ class ProductFactory extends Factory
     {
         return [
             'product_id' => $this->faker->uuid(),
+            'name' => $this->faker->sentence(3),
             'merchant_id' => Merchant::all()->random()->merchant_id,
             'product_category_id' => ProductCategory::all()->random()->id,
-            // 'product_category_id' => 1,
-            'name' => $this->faker->sentence(3),
-            'price' => $this->faker->numberBetween(15000, 150000),
-            'description' => $this->faker->paragraph(),
-            'is_available' => $this->faker->randomElement([true, false]),
+            'minimal_order' => $this->faker->numberBetween(1, 10),
+            'short_desc' => $this->faker->paragraph(),
+            'price_value' => $this->faker->numberBetween(15000, 150000),
+            'stock_value' => $this->faker->numberBetween(1, 50),
         ];
     }
 }

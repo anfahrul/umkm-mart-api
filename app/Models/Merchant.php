@@ -17,8 +17,8 @@ class Merchant extends Model
     protected $keyType = 'string';
     protected $guarded = ['merchant_id'];
 
-    public function productCategory() {
-        return $this->belongsTo(ProductCategory::class, 'product_category_id');
+    public function umkmCategory() {
+        return $this->belongsTo(UmkmCategory::class, 'umkm_category_id');
     }
 
     public function products() {

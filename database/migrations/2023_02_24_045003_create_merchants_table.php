@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('merchant_id')->primary();
             $table->foreignUuid("user_id")->unique();
             $table->string('merchant_name');
-            $table->foreignId("product_category_id");
+            $table->foreignId("umkm_category_id");
             $table->string('domain')->unique();
             $table->string('address');
             $table->boolean('is_open')->default(1);

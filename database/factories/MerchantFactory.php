@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\ProductCategory;
+use App\Models\UmkmCategory;
 use App\Models\User;
 
 /**
@@ -27,7 +27,7 @@ class MerchantFactory extends Factory
             'user_id' => User::first()->id,
             // 'user_id' => $this->faker->unique()->randomElement([1, 2, 3, 4, 5]),
             'merchant_name' => $merchantName,
-            'product_category_id' => ProductCategory::all()->random()->id,
+            'umkm_category_id' => UmkmCategory::all()->random()->id,
             'domain' => $domain,
             'address' => $this->faker->address(),
             'is_open' => $this->faker->randomElement([true, false]),

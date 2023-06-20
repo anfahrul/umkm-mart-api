@@ -23,7 +23,7 @@ class UpdateMerchantRequest extends FormRequest
     {
         return [
             'merchant_name' => ['required','string'],
-            'product_category_id' => ['required','string'],
+            'umkm_category_id' => ['required','string'],
             'address' => ['required','string'],
             'is_open' => ['required','boolean'],
             'wa_number' => ['required','string'],

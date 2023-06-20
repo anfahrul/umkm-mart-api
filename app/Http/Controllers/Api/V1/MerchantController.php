@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Merchant;
 use App\Models\ProductCategory;
+use App\Models\UmkmCategory;
 use App\Models\Product;
 use App\Http\Requests\StoreMerchantRequest;
 use App\Http\Requests\UpdateMerchantRequest;
@@ -32,18 +33,18 @@ class MerchantController extends Controller
      */
     public function index(Request $request)
     {
-        $productCategoryQuery = $request->query('product-category');
-        if ($productCategoryQuery == null) {
+        $umkmCategoryQuery = $request->query('umkm-category-slug');
+        if ($umkmCategoryQuery == null) {
             return new MerchantCollection(Merchant::latest()->get());
         } else {
-            $productCategory = ProductCategory::where('slug', $productCategoryQuery)->first();
-            if ($productCategory == null) {
+            $umkmCategory = UmkmCategory::where('slug', $umkmCategoryQuery)->first();
+            if ($umkmCategory == null) {
                 return response()->json([
-                    'messages' => 'Product category not found.'
+                    'messages' => 'Umkm category not found.'
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            $merchants = Merchant::where('product_category_id', $productCategory->id)->get();
+            $merchants = Merchant::where('umkm_category_id', $umkmCategory->id)->get();
             if (count($merchants) == 0) {
                 return response()->json([
                     'messages' => 'Merchants not found in that category.'
@@ -67,6 +68,13 @@ class MerchantController extends Controller
      */
     public function store(StoreMerchantRequest $request)
     {
+        $merchantIsExist = Merchant::where('user_id', auth()->user()->id)->get();
+        if (count($merchantIsExist) >= 1) {
+            return response()->json([
+                'errors' => 'Your merchant is already exist.'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
         $merchantIsExist = Merchant::where('merchant_name', $request->merchant_name)->get();
         if (count($merchantIsExist) > 0) {
             return response()->json([
@@ -75,46 +83,38 @@ class MerchantController extends Controller
         }
 
         try {
-            $merchantIsExist = Merchant::where('user_id', auth()->user()->id)->get();
+            $logoName = '';
 
-            if (count($merchantIsExist) >= 1) {
-                return response()->json([
-                    'errors' => 'Merchant is already exist.'
-                ], Response::HTTP_BAD_REQUEST);
-            } else {
-                $logoName = '';
+            if (request()->hasFile('logo')){
+                $logo = $request->file('logo');
+                $originalLogoName = str_replace( " ", "-", $logo->getClientOriginalName());
+                $logoName = Str::random(32) . '_' . $originalLogoName;
 
-                if (request()->hasFile('logo')){
-                    $logo = $request->file('logo');
-                    $originalLogoName = str_replace( " ", "-", $logo->getClientOriginalName());
-                    $logoName = Str::random(32) . '_' . $originalLogoName;
-
-                    $logo->storeAs('public/merchantsLogo', $logoName);
-                }else{
-                    $logoName = 'default-logo.jpg';
-                }
-
-                $merchantName = $request->merchant_name;
-                $domainWithoutSpace = str_replace( " ", "-", $merchantName);
-                $domain = strtolower($domainWithoutSpace);
-
-                return new MerchantResource(
-                    Merchant::create(array_merge([
-                        'user_id' => auth()->user()->id,
-                        'merchant_name' => $merchantName,
-                        'product_category_id' => $request->product_category_id,
-                        'domain' => $domain,
-                        'address' => $request->address,
-                        'is_open' => 1,
-                        'wa_number' => $request->wa_number,
-                        'merchant_website_url' => $request->merchant_website_url,
-                        'is_verified' => 0,
-                        'original_logo_url' => '/storage/merchantsLogo/' . $logoName,
-                        'operational_time_oneday' => $request->operational_time_oneday,
-                        'description' => $request->description])
-                    )
-                );
+                $logo->storeAs('public/merchantsLogo', $logoName);
+            }else{
+                $logoName = 'default-logo.jpg';
             }
+
+            $merchantName = $request->merchant_name;
+            $domainWithoutSpace = str_replace( " ", "-", $merchantName);
+            $domain = strtolower($domainWithoutSpace);
+
+            return new MerchantResource(
+                Merchant::create(array_merge([
+                    'user_id' => auth()->user()->id,
+                    'merchant_name' => $merchantName,
+                    'umkm_category_id' => $request->umkm_category_id,
+                    'domain' => $domain,
+                    'address' => $request->address,
+                    'is_open' => 1,
+                    'wa_number' => $request->wa_number,
+                    'merchant_website_url' => $request->merchant_website_url,
+                    'is_verified' => 0,
+                    'original_logo_url' => '/storage/merchantsLogo/' . $logoName,
+                    'operational_time_oneday' => $request->operational_time_oneday,
+                    'description' => $request->description])
+                )
+            );
         } catch (\Exception $e) {
             return response()->json([
                 'errors' => 'Something went really wrong!'
@@ -190,7 +190,7 @@ class MerchantController extends Controller
                 }
             }
 
-            $merchant->product_category_id = $request->product_category_id;
+            $merchant->umkm_category_id = $request->umkm_category_id;
             $merchant->address = $request->address;
             $merchant->is_open = $request->is_open;
             $merchant->wa_number = $request->wa_number;

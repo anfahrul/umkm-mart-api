@@ -10,9 +10,12 @@ use App\Http\Controllers\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Str;
 use App\Http\Resources\V1\ProductImageResource;
+use App\Http\Resources\V1\ProductImageStoreResponseResource;
+use App\Http\Resources\V1\ProductImageDeleteResponseResource;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Api\V1\ApiController;
 
-class ProductImageController extends Controller
+class ProductImageController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -36,27 +39,36 @@ class ProductImageController extends Controller
     public function store(StoreProductImageRequest $request, $product_id)
     {
         $product = Product::find($product_id);
-        $productImage;
 
         if ($product === null) {
-            return response()->json([
-                'errors' => 'Product is not found.'
-            ], Response::HTTP_NOT_FOUND);
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                "Product with id " . $product_id . " is not found",
+                Response::HTTP_NOT_FOUND
+            );
         } else {
+            $productImages = [];
+
             foreach ($request->file("images") as $image) {
                 $originalImageName = str_replace( " ", "-", $image->getClientOriginalName());
                 $imageName = Str::random(32) . '_' . $originalImageName;
 
-                $productImage = new ProductImageResource(
-                    ProductImage::create([
-                        "product_id" => $product_id,
-                        "file_path" => '/storage/productsLogo/' . $imageName,
-                    ])
-                );
-                $image->storeAs('public/productsLogo', $imageName);
+                $productImage = ProductImage::create(array_merge([
+                    "id" => Str::random(8),
+                    "product_id" => $product_id,
+                    "file_path" => '/storage/productImages/' . $imageName,
+                ]));
+
+                array_push($productImages, $productImage);
+
+                $image->storeAs('public/productImages', $imageName);
             }
 
-            return $productImage;
+            return $this->successResponse(
+                Response::HTTP_CREATED . " Created",
+                ProductImageStoreResponseResource::collection($productImages),
+                Response::HTTP_CREATED
+            );
         }
     }
 
@@ -87,33 +99,29 @@ class ProductImageController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($product_id, $product_image_id)
+    public function destroy($product_image_id)
     {
-        $product = Product::find($product_id);
+        $productImage = ProductImage::find($product_image_id);
 
-        if ($product === null) {
-            return response()->json([
-                'errors' => 'Product is not found.'
-            ], Response::HTTP_NOT_FOUND);
+        if ($productImage === null) {
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                "Product image with id " . $product_image_id . " is not found",
+                Response::HTTP_NOT_FOUND
+            );
         } else {
-            $productImage = ProductImage::find($product_image_id);
+            $productImageRes = ProductImage::find($product_image_id)->first();
 
-            if ($productImage === null) {
-                return response()->json([
-                    'errors' => 'Product image is not found.'
-                ], Response::HTTP_NOT_FOUND);
-            } else {
-                $productImageRes = ProductImage::find($product_image_id)->first();
+            $imageFromDatabase = substr($productImageRes->file_path, 22);
+            Storage::delete('public/productImages/'.$imageFromDatabase);
 
-                $imageFromDatabase = substr($productImageRes->file_path, 22);
-                Storage::delete('public/productsLogo/'.$imageFromDatabase);
+            $productImage->delete();
 
-                $productImage->delete();
-
-                return response()->json([
-                    'messages' => 'Product image is deleted successful.'
-                ], Response::HTTP_OK);
-            }
+            return $this->successResponse(
+                Response::HTTP_OK . " OK",
+                new ProductImageDeleteResponseResource($productImage),
+                Response::HTTP_OK
+            );
         }
     }
 }

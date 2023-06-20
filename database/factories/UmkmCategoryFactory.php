@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Carbon\Carbon;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductCategory>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\UmkmCategory>
  */
-class ProductCategoryFactory extends Factory
+class UmkmCategoryFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,12 +17,12 @@ class ProductCategoryFactory extends Factory
      */
     public function definition(): array
     {
-        $productCategory = Carbon::now()->timestamp . " " . $this->faker->unique()->word(3);
-        $slugWithoutSpace = str_replace( " ", "-", $productCategory);
+        $umkmCategory = Carbon::now()->timestamp . " " . $this->faker->unique()->word(3);
+        $slugWithoutSpace = str_replace( " ", "-", $umkmCategory);
         $slug = strtolower($slugWithoutSpace);
 
         return [
-            'name' => $productCategory,
+            'name' => $umkmCategory,
             'slug' => $slug
         ];
     }
