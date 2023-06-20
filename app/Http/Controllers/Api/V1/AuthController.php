@@ -6,14 +6,16 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Resources\V1\UserResource;
+use App\Http\Resources\V1\UserStoreResponseResource;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Customer;
 use Symfony\Component\HttpFoundation\Response;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use App\Http\Controllers\Api\V1\ApiController;
 
-class AuthController extends Controller
+class AuthController extends ApiController
 {
     /**
      * Create a new AuthController instance.
@@ -35,14 +37,18 @@ class AuthController extends Controller
             'user_id' => $user_id
         ]);
 
-        return new UserResource(
-            User::create(array_merge([
-                'id' => $user_id,
-                'username' => $request->username,
-                'email' => $request->email,
-                'password' => bcrypt($request->password),
-                'registration_at' => Carbon::now()->timestamp]),
-            )
+        $user = User::create(array_merge([
+            'id' => $user_id,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'registration_at' => Carbon::now()->timestamp])
+        );
+
+        return $this->successResponse(
+            Response::HTTP_OK . " OK",
+            new UserStoreResponseResource($user),
+            Response::HTTP_OK
         );
     }
 
