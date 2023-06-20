@@ -5,7 +5,7 @@ namespace App\Http\Resources\V1;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UmkmCategoryResource extends JsonResource
+class ProductImageDeleteResponseResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,8 +15,7 @@ class UmkmCategoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'name' => $this->name,
-            'slug' => $this->slug,
+            'product_image_id' => $this->id,
         ];
     }
 }

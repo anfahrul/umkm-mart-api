@@ -52,7 +52,7 @@ Route::group([
 ], function() {
     Route::post('merchants', [MerchantController::class, 'store']);
     Route::get('merchants', [MerchantController::class, 'index']);
-    Route::get('merchants?product-category={slug}', [MerchantController::class, 'index']);
+    Route::get('merchants?umkm-category={slug}', [MerchantController::class, 'index']);
     Route::get('merchants/{merchant_id}', [MerchantController::class, 'show']);
     Route::put('merchants/{merchant_id}', [MerchantController::class, 'update']);
     Route::delete('merchants/{merchant_id}', [MerchantController::class, 'destroy']);
@@ -65,11 +65,12 @@ Route::group([
 ], function() {
     Route::post('products/{merchant_id}', [ProductController::class, 'store']);
     Route::get('products', [ProductController::class, 'index']);
+    Route::get('products?product-category={slug}', [ProductController::class, 'index']);
     Route::get('products/{product_id}', [ProductController::class, 'show']);
     Route::put('products/{product_id}', [ProductController::class, 'update']);
     Route::delete('products/{product_id}', [ProductController::class, 'destroy']);
     Route::post('products/{product_id}/images/add', [ProductImageController::class, 'store']);
-    Route::delete('products/{product_id}/images/delete/{product_image_id}', [ProductImageController::class, 'destroy']);
+    Route::delete('products/images/{product_image_id}/delete', [ProductImageController::class, 'destroy']);
 });
 
 // api/v1/products-categories

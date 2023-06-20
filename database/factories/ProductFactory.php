@@ -28,7 +28,6 @@ class ProductFactory extends Factory
             'short_desc' => $this->faker->paragraph(),
             'price_value' => $this->faker->numberBetween(15000, 150000),
             'stock_value' => $this->faker->numberBetween(1, 50),
-            'pict_thumbnail' => '-',
         ];
     }
 }

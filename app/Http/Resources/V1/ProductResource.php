@@ -18,7 +18,6 @@ class ProductResource extends JsonResource
     public function toArray(Request $request): array
     {
         $product_thumbnail_path = Product::find($this->product_id)->productImage->first();
-        // $product_thumbnail_path = ProductImage::where('product_id', $this->product_id)->first();
 
         return [
             'product_id' => $this->product_id,
@@ -29,7 +28,7 @@ class ProductResource extends JsonResource
             'short_desc' => $this->short_desc,
             'price_value' => $this->price_value,
             'stock_value' => $this->stock_value,
-            'pict_thumbnail' => new ProductImageResource($product_thumbnail_path),
+            'pict_thumbnail_path' => new ProductImageResource($product_thumbnail_path),
             'product_pictures' => ProductImageResource::collection(Product::find($this->product_id)->productImage),
         ];
     }

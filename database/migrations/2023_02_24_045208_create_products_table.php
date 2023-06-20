@@ -20,7 +20,6 @@ return new class extends Migration
             $table->longText("short_desc");
             $table->integer("price_value");
             $table->integer("stock_value");
-            $table->string("pict_thumbnail");
             $table->timestamps();
         });
     }
