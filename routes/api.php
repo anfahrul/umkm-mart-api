@@ -40,11 +40,13 @@ Route::group([
 
 // api/v1/customer
 Route::group([
-    'middleware' => 'api',
     'prefix' => 'v1/customer'
 ], function ($router) {
     Route::get('/{username}', [CustomerController::class, 'index']);
-    Route::put('/{username}', [CustomerController::class, 'update']);
+
+    Route::group(['middleware' => ['auth.role:user']], function () {
+        Route::put('/update', [CustomerController::class, 'update']);
+    });
 });
 
 // api/v1/merchants
