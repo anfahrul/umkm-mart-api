@@ -20,9 +20,9 @@ use App\Http\Controllers\Api\V1\CustomerController;
 |
 */
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
 
 // api/v1/auth
 Route::group([
@@ -51,21 +51,24 @@ Route::group([
 
 // api/v1/merchants
 Route::group([
-    'middleware' => 'api',
-    'prefix' => 'v1',
+    'prefix' => 'v1/merchants',
 ], function() {
-    Route::post('merchants', [MerchantController::class, 'store']);
-    Route::get('merchants', [MerchantController::class, 'index']);
-    Route::get('merchants?umkm-category={slug}', [MerchantController::class, 'index']);
-    Route::get('merchants/{merchant_id}', [MerchantController::class, 'show']);
-    Route::get('merchants/domain/{domain}', [MerchantController::class, 'showByDomain']);
-    Route::put('merchants/{merchant_id}', [MerchantController::class, 'update']);
-    Route::delete('merchants/{merchant_id}', [MerchantController::class, 'destroy']);
+    Route::get('/', [MerchantController::class, 'index']);
+    Route::get('?umkm-category={slug}', [MerchantController::class, 'index']);
+    Route::get('/{merchant_id}', [MerchantController::class, 'show']);
+    Route::get('/domain/{domain}', [MerchantController::class, 'showByDomain']);
+    Route::get('/logo/{filename}', [MerchantController::class, 'getLogo']);
+
+    Route::group(['middleware' => ['auth.role:user']], function () {
+        Route::post('/', [MerchantController::class, 'store']);
+        Route::put('/update', [MerchantController::class, 'update']);
+        Route::delete('/delete', [MerchantController::class, 'destroy']);
+    });
 });
 
 // api/v1/products
 Route::group([
-    'middleware' => 'api',
+    // 'middleware' => 'api',
     'prefix' => 'v1',
 ], function() {
     Route::post('products/{merchant_id}', [ProductController::class, 'store']);
