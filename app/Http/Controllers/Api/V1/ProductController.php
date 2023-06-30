@@ -28,8 +28,9 @@ class ProductController extends ApiController
      *
      * @return void
      */
-    public function __construct() {
-        $this->middleware('auth:api', ['except' => ['index', 'show']]);
+    public function __construct()
+    {
+        $this->middleware('auth.role:user', ['except' => ['index','show','getImage']]);
     }
 
     /**
@@ -94,7 +95,14 @@ class ProductController extends ApiController
                 Response::HTTP_NOT_FOUND
             );
         } else {
-            $merchantNew = Merchant::find($merchant_id);
+            $merchant = Merchant::where('user_id', auth()->user()->id)->first();
+            if ($merchant_id != $merchant->merchant_id) {
+                return $this->errorResponse(
+                    Response::HTTP_UNAUTHORIZED . " Unauthorized",
+                    "Merchant with id " . $merchant_id . " is not yours",
+                    Response::HTTP_UNAUTHORIZED
+                );
+            }
 
             $product = Product::create(array_merge([
                 'name' => $request->name,
@@ -115,7 +123,7 @@ class ProductController extends ApiController
                     new ProductImageResource(
                         ProductImage::create([
                             "product_id" => $product->product_id,
-                            "file_path" => '/storage/productImages/' . $imageName,
+                            "file_path" => $imageName,
                         ])
                     );
                     $image->storeAs('public/productImages', $imageName);
@@ -153,6 +161,24 @@ class ProductController extends ApiController
     }
 
     /**
+     * Display the product's image.
+     */
+    public function getImage($filename)
+    {
+        $path = public_path('/storage/productImages/' . $filename);
+
+        if (file_exists($path)) {
+            return response()->file($path);
+        }
+
+        return $this->errorResponse(
+            Response::HTTP_NOT_FOUND . " Not Found",
+            "Product's image is not found",
+            Response::HTTP_NOT_FOUND
+        );
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Product $product)
@@ -165,21 +191,35 @@ class ProductController extends ApiController
      */
     public function update(UpdateProductRequest $request, $product_id)
     {
-        $product = Product::find($product_id);
+        $productIsExist = Product::find($product_id);
 
-        if ($product === null) {
+        if ($productIsExist === null) {
             return $this->errorResponse(
                 Response::HTTP_NOT_FOUND . " Not Found",
                 "Product with id " . $product_id . " is not found",
                 Response::HTTP_NOT_FOUND
             );
         } else {
+            $merchant = Merchant::where('user_id', auth()->user()->id)->first();
+            $product = DB::table('products')
+                ->where('product_id', '=', $product_id)
+                ->where('merchant_id', '=', $merchant->merchant_id)
+                ->first();
+
+            if ($product == null) {
+                return $this->errorResponse(
+                    Response::HTTP_UNAUTHORIZED . " Unauthorized",
+                    "Product with id " . $product_id . " is not your merchant's product",
+                    Response::HTTP_UNAUTHORIZED
+                );
+            }
+
             if (request()->hasFile('images')){
-                $productImages = ProductImage::where('product_id', $product_id)->get();
+                $productImages = ProductImage::where('product_id', $product->product_id)->get();
 
                 foreach ($productImages as $images => $value){
                     //delete logo from storage
-                    $imageFromDatabase = substr($value->file_path, 22);
+                    $imageFromDatabase = $value->file_path;
                     Storage::delete('public/productImages/'.$imageFromDatabase);
 
                     // Delete row
@@ -194,21 +234,21 @@ class ProductController extends ApiController
                     new ProductImageResource(
                         ProductImage::create([
                             "product_id" => $product_id,
-                            "file_path" => '/storage/productImages/' . $imageName,
+                            "file_path" => $imageName,
                         ])
                     );
                     $image->storeAs('public/productImages', $imageName);
                 }
             }
 
-            $product->name = $request->name;
-            $product->product_category_id = $request->product_category_id;
-            $product->minimal_order = $request->minimal_order;
-            $product->minimal_order = $request->minimal_order;
-            $product->price_value = $request->price_value;
-            $product->stock_value = $request->stock_value;
+            $productIsExist->name = $request->name;
+            $productIsExist->product_category_id = $request->product_category_id;
+            $productIsExist->minimal_order = $request->minimal_order;
+            $productIsExist->minimal_order = $request->minimal_order;
+            $productIsExist->price_value = $request->price_value;
+            $productIsExist->stock_value = $request->stock_value;
 
-            $product->save();
+            $productIsExist->save();
             return $this->successResponse(
                 Response::HTTP_OK . " OK",
                 new ProductStoreResponseResource($product),
@@ -222,20 +262,34 @@ class ProductController extends ApiController
      */
     public function destroy($product_id)
     {
-        $product = Product::find($product_id);
+        $productIsExist = Product::find($product_id);
 
-        if ($product === null) {
+        if ($productIsExist === null) {
             return $this->errorResponse(
                 Response::HTTP_NOT_FOUND . " Not Found",
                 "Product with id " . $product_id . " is not found",
                 Response::HTTP_NOT_FOUND
             );
         } else {
+            $merchant = Merchant::where('user_id', auth()->user()->id)->first();
+            $product = DB::table('products')
+                ->where('product_id', '=', $product_id)
+                ->where('merchant_id', '=', $merchant->merchant_id)
+                ->first();
+
+            if ($product == null) {
+                return $this->errorResponse(
+                    Response::HTTP_UNAUTHORIZED . " Unauthorized",
+                    "Product with id " . $product_id . " is not your merchant's product",
+                    Response::HTTP_UNAUTHORIZED
+                );
+            }
+
             $productImages = ProductImage::where('product_id', $product_id)->get();
 
             foreach ($productImages as $images => $value){
                 //delete logo from storage
-                $imageFromDatabase = substr($value->file_path, 22);
+                $imageFromDatabase = $value->file_path;
                 Storage::delete('public/productImages/'.$imageFromDatabase);
 
                 // Delete row
@@ -243,7 +297,7 @@ class ProductController extends ApiController
                 $productImageDeleted->delete();
             }
 
-            $product->delete();
+            $productIsExist->delete();
 
             return $this->successResponse(
                 Response::HTTP_OK . " OK",
