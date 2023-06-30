@@ -20,20 +20,22 @@ use App\Http\Controllers\Api\V1\CustomerController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
 // api/v1/auth
 Route::group([
-    'middleware' => 'api',
     'prefix' => 'v1/auth'
 ], function ($router) {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/user-account', [AuthController::class, 'userProfile']);
-    Route::post('/refresh', [AuthController::class, 'refresh']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::group(['middleware' => ['auth.role:system-admin,user']], function () {
+        Route::get('/user-account', [AuthController::class, 'userProfile']);
+        Route::post('/refresh', [AuthController::class, 'refresh']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+    });
 });
 
 // api/v1/customer
@@ -77,8 +79,9 @@ Route::group([
 // api/v1/products-categories
 Route::group([
     'prefix' => 'v1',
-    'namespace' => 'App\Http\Controllers\Api\V1'
 ], function() {
-    Route::post('product_categories', [ProductCategoryController::class, 'store']);
-    Route::get('product_categories', [ProductCategoryController::class, 'index']);
+    Route::group(['middleware' => ['auth.role:system-admin,user']], function () {
+        Route::get('product_categories', [ProductCategoryController::class, 'index']);
+        Route::post('product_categories', [ProductCategoryController::class, 'store']);
+    });
 });

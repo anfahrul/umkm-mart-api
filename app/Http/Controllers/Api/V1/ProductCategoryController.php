@@ -12,6 +12,16 @@ use App\Http\Resources\V1\ProductCategoryCollection;
 class ProductCategoryController extends Controller
 {
     /**
+     * Create a new AuthController instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth.role:system-admin');
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index()

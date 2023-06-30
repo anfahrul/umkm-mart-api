@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Api\V1\ApiController;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends ApiController
 {
@@ -23,9 +24,11 @@ class AuthController extends ApiController
      *
      * @return void
      */
-    public function __construct() {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+    public function __construct()
+    {
+        $this->middleware('auth.role:system-admin,user', ['except' => ['register', 'login', 'userProfile']]);
     }
+
     /**
      * Register a User.
      *
@@ -34,16 +37,19 @@ class AuthController extends ApiController
     public function register(StoreUserRequest $request) {
         $user_id = Str::uuid()->toString();
 
-        Customer::create([
-            'user_id' => $user_id
-        ]);
+        if ($request->role == "user") {
+            Customer::create([
+                'user_id' => $user_id
+            ]);
+        }
 
         $user = User::create(array_merge([
             'id' => $user_id,
             'username' => $request->username,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'registration_at' => Carbon::now()->timestamp])
+            'registration_at' => Carbon::now()->timestamp,
+            'role' => $request->role])
         );
 
         return $this->successResponse(
@@ -59,7 +65,7 @@ class AuthController extends ApiController
      * @return \Illuminate\Http\JsonResponse
      */
     public function login(LoginRequest $request){
-        if (! $token = auth()->attempt($request->validated())) {
+        if (! $token = JWTAuth::attempt($request->validated())) {
             return response()->json([
                 'message' => 'Invalid Email or Password',
                 'errors' => 'Unauthorized'
