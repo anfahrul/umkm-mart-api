@@ -71,7 +71,7 @@ Route::group([
     'prefix' => 'v1/products',
 ], function() {
     Route::get('', [ProductController::class, 'index']);
-    Route::get('?product-category={slug}', [ProductController::class, 'index']);
+    Route::get('?product-category-slug={slug}', [ProductController::class, 'index']);
     Route::get('/{product_id}', [ProductController::class, 'show']);
     Route::get('/image/{filename}', [ProductController::class, 'getImage']);
 
@@ -86,10 +86,13 @@ Route::group([
 
 // api/v1/products-categories
 Route::group([
-    'prefix' => 'v1',
+    'prefix' => 'v1/product-categories',
 ], function() {
-    Route::group(['middleware' => ['auth.role:system-admin,user']], function () {
-        Route::get('product_categories', [ProductCategoryController::class, 'index']);
-        Route::post('product_categories', [ProductCategoryController::class, 'store']);
+    Route::get('/', [ProductCategoryController::class, 'index']);
+    Route::get('?umkm-category-slug={slug}', [ProductCategoryController::class, 'index']);
+
+    Route::group(['middleware' => ['auth.role:system-admin']], function () {
+        Route::post('/', [ProductCategoryController::class, 'store']);
+        Route::delete('/{slug}', [ProductCategoryController::class, 'destroy']);
     });
 });

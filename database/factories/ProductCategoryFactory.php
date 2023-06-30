@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Carbon\Carbon;
+use App\Models\UmkmCategory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductCategory>
@@ -23,7 +24,8 @@ class ProductCategoryFactory extends Factory
 
         return [
             'name' => $productCategory,
-            'slug' => $slug
+            'slug' => $slug,
+            'umkm_category_id' => UmkmCategory::all()->random()->id,
         ];
     }
 }
