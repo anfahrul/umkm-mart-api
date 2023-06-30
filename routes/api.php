@@ -68,17 +68,20 @@ Route::group([
 
 // api/v1/products
 Route::group([
-    // 'middleware' => 'api',
-    'prefix' => 'v1',
+    'prefix' => 'v1/products',
 ], function() {
-    Route::post('products/{merchant_id}', [ProductController::class, 'store']);
-    Route::get('products', [ProductController::class, 'index']);
-    Route::get('products?product-category={slug}', [ProductController::class, 'index']);
-    Route::get('products/{product_id}', [ProductController::class, 'show']);
-    Route::put('products/{product_id}', [ProductController::class, 'update']);
-    Route::delete('products/{product_id}', [ProductController::class, 'destroy']);
-    Route::post('products/{product_id}/images/add', [ProductImageController::class, 'store']);
-    Route::delete('products/images/{product_image_id}/delete', [ProductImageController::class, 'destroy']);
+    Route::get('', [ProductController::class, 'index']);
+    Route::get('?product-category={slug}', [ProductController::class, 'index']);
+    Route::get('/{product_id}', [ProductController::class, 'show']);
+    Route::get('/image/{filename}', [ProductController::class, 'getImage']);
+
+    Route::group(['middleware' => ['auth.role:user']], function () {
+        Route::post('/{merchant_id}', [ProductController::class, 'store']);
+        Route::put('/{product_id}', [ProductController::class, 'update']);
+        Route::delete('/{product_id}', [ProductController::class, 'destroy']);
+        Route::post('/{product_id}/images/add', [ProductImageController::class, 'store']);
+        Route::delete('/{product_id}/images/{product_image_id}/delete', [ProductImageController::class, 'destroy']);
+    });
 });
 
 // api/v1/products-categories
