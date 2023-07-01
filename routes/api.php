@@ -25,6 +25,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// api/v1/hello
+Route::get('v1/hello', function () {
+    return response()->json([
+        'status'=> "200 OK",
+        'message' => "Your request has been processed successfully",
+        'data' => "Welcome to Umkmart API"
+    ], 200);
+});
+
 // api/v1/auth
 Route::group([
     'prefix' => 'v1/auth'
