@@ -16,4 +16,8 @@ class UmkmCategory extends Model
     public function merchants() {
         return $this->hasMany(Merchant::class);
     }
+
+    public function childs() {
+        return $this->hasMany(ProductCategory::class);
+    }
 }

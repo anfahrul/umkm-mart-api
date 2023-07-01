@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ProductCategoryController;
 use App\Http\Controllers\Api\V1\ProductImageController;
 use App\Http\Controllers\Api\V1\CustomerController;
+use App\Http\Controllers\Api\V1\UmkmCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,5 +95,18 @@ Route::group([
     Route::group(['middleware' => ['auth.role:system-admin']], function () {
         Route::post('/', [ProductCategoryController::class, 'store']);
         Route::delete('/{slug}', [ProductCategoryController::class, 'destroy']);
+    });
+});
+
+// api/v1/umkm-categories
+Route::group([
+    'prefix' => 'v1/umkm-categories',
+], function() {
+    Route::get('/', [UmkmCategoryController::class, 'index']);
+    Route::get('/{slug}', [UmkmCategoryController::class, 'getChild']);
+
+    Route::group(['middleware' => ['auth.role:system-admin']], function () {
+        Route::post('/', [UmkmCategoryController::class, 'store']);
+        Route::delete('/{slug}', [UmkmCategoryController::class, 'destroy']);
     });
 });
