@@ -1,4 +1,4 @@
-## How to Run Umkmart API on Local Machine
+## How to Run Umkmart API
 
 1. Clone Repository
 
