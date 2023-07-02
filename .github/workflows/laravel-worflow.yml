@@ -59,12 +59,12 @@ jobs:
       - name: Install Railway
         run: npm i -g @railway/cli
         
-      - name: Authenticate with Railway
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway login
-
-      - name: Build and Deploy
+      - name: Build
         env:
           RAILWAY_PROJECT_ID: ${{ secrets.PROJECT_ID }}
         run: railway run nixpacks
+        
+      - name: Deploy
+        run: railway up
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
