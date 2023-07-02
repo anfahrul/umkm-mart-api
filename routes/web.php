@@ -14,7 +14,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    // return view('welcome');
+    return response()->json([
+        'status' => 'OK',
+        'message' => 'Selamat datang di Umkmart APIs'
+    ], 200);
 });
 
 Route::get('/healthcheck', function () {
