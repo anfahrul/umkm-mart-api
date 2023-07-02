@@ -1,4 +1,4 @@
-## How to Run Umkmart API
+## How to Run Umkmart APIs
 
 1. Clone Repository
 
