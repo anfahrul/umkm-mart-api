@@ -43,12 +43,26 @@ jobs:
   deploy:
     needs: laravel-tests
     runs-on: ubuntu-latest
-
+    
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Use PHP 8.1
+      - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+        with:
+          php-version: '8.1'
+
+      - name: Install Dependencies
+        run: composer install
+
+      - name: Run build
+        run: ${{ NIXPACKS_BUILD_CMD }}
+
       - name: Install Railway
         run: npm i -g @railway/cli
 
       - name: Deploy
         run: railway up --service umkm-mart-api
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }
