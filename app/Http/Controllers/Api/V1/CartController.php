@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Validator;
 use App\Http\Resources\V1\CartStoreResponseResource;
+use App\Http\Resources\V1\CartResource;
 
 class CartController extends ApiController
 {
@@ -33,7 +34,13 @@ class CartController extends ApiController
      */
     public function index()
     {
-        //
+        $customer = Customer::where('user_id', auth()->user()->id)->first();
+
+        return $this->successResponse(
+            Response::HTTP_OK . " OK",
+            CartResource::collection(Customer::find($customer->id)->carts),
+            Response::HTTP_OK
+        );
     }
 
     /**

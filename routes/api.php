@@ -118,4 +118,5 @@ Route::group([
     'middleware' => ['auth.role:user']
 ], function() {
     Route::post('/{product_id}', [CartController::class, 'store']);
+    Route::get('/', [CartController::class, 'index']);
 });

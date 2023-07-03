@@ -21,4 +21,8 @@ class Cart extends Model
     ];
 
     public $timestamps = false;
+
+    public function cart() {
+        return $this->belongsTo(Customer::class);
+    }
 }
