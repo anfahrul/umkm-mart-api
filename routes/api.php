@@ -121,6 +121,7 @@ Route::group([
     Route::post('/{product_id}', [CartController::class, 'store']);
     Route::get('/', [CartController::class, 'index']);
     Route::get('/{cart_id}', [CartController::class, 'show']);
-    Route::put('/{cart_detail_id}', [CartDetailController::class, 'update']);
-    Route::delete('/{cart_detail_id}', [CartDetailController::class, 'destroy']);
+    Route::put('/detail/{cart_detail_id}', [CartDetailController::class, 'update']);
+    Route::delete('/detail/{cart_detail_id}', [CartDetailController::class, 'destroy']);
+    Route::delete('/{cart_id}', [CartController::class, 'destroy']);
 });

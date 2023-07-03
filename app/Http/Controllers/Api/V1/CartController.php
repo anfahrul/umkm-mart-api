@@ -17,6 +17,7 @@ use Validator;
 use App\Http\Resources\V1\CartStoreResponseResource;
 use App\Http\Resources\V1\CartResource;
 use App\Http\Resources\V1\CartWithDetailsResource;
+use App\Http\Resources\V1\CartDeleteResponseResource;
 
 class CartController extends ApiController
 {
@@ -159,8 +160,28 @@ class CartController extends ApiController
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Cart $cart)
+    public function destroy(Cart $cart, $cart_id)
     {
-        //
+        $cart = Cart::find($cart_id);
+        if ($cart === null) {
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                "Cart with id " . $cart_id . " is not found",
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        $cartDetails = $cart->cartDetails;
+        foreach ($cartDetails as $cartDetail => $value){
+            $detail = CartDetail::where('id', $value->id)->first();
+            $detail->delete();
+        }
+        $cart->delete();
+
+        return $this->successResponse(
+            Response::HTTP_OK . " OK",
+            new CartDeleteResponseResource($cart),
+            Response::HTTP_OK
+        );
     }
 }
