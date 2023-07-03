@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\ProductImageController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\UmkmCategoryController;
 use App\Http\Controllers\Api\V1\CartController;
+use App\Http\Controllers\Api\V1\CartDetailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -120,4 +121,5 @@ Route::group([
     Route::post('/{product_id}', [CartController::class, 'store']);
     Route::get('/', [CartController::class, 'index']);
     Route::get('/{cart_id}', [CartController::class, 'show']);
+    Route::put('/{cart_detail_id}', [CartDetailController::class, 'update']);
 });
