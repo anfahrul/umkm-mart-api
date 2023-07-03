@@ -12,6 +12,7 @@ use Validator;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
 use App\Http\Resources\V1\CartDetailsUpdateResponseResource;
+use App\Http\Resources\V1\CartDetailsDeleteResponseResource;
 
 class CartDetailController extends ApiController
 {
@@ -120,8 +121,28 @@ class CartDetailController extends ApiController
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(CartDetail $cartDetail)
+    public function destroy(CartDetail $cartDetail, $cart_detail_id)
     {
-        //
+        $cartDetail = CartDetail::find($cart_detail_id);
+        if ($cartDetail === null) {
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                "Details of cart with id " . $cart_detail_id . " is not found",
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        $priceOfCartDetail = $cartDetail->price;
+        $existingCart = Cart::find($cartDetail->cart_id);
+
+        $existingCart->total = $existingCart->total - $priceOfCartDetail;
+        $existingCart->save();
+        $cartDetail->delete();
+
+        return $this->successResponse(
+            Response::HTTP_OK . " OK",
+            new CartDetailsDeleteResponseResource($cartDetail),
+            Response::HTTP_OK
+        );
     }
 }
