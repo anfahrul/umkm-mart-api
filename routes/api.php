@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\V1\ProductCategoryController;
 use App\Http\Controllers\Api\V1\ProductImageController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\UmkmCategoryController;
+use App\Http\Controllers\Api\V1\CartController;
+use App\Http\Controllers\Api\V1\CartDetailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -109,4 +111,17 @@ Route::group([
         Route::post('/', [UmkmCategoryController::class, 'store']);
         Route::delete('/{slug}', [UmkmCategoryController::class, 'destroy']);
     });
+});
+
+// api/v1/carts
+Route::group([
+    'prefix' => 'v1/carts',
+    'middleware' => ['auth.role:user']
+], function() {
+    Route::post('/{product_id}', [CartController::class, 'store']);
+    Route::get('/', [CartController::class, 'index']);
+    Route::get('/{cart_id}', [CartController::class, 'show']);
+    Route::put('/detail/{cart_detail_id}', [CartDetailController::class, 'update']);
+    Route::delete('/detail/{cart_detail_id}', [CartDetailController::class, 'destroy']);
+    Route::delete('/{cart_id}', [CartController::class, 'destroy']);
 });
