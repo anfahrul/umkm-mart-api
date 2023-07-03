@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Validator;
 use App\Http\Resources\V1\CartStoreResponseResource;
 use App\Http\Resources\V1\CartResource;
+use App\Http\Resources\V1\CartWithDetailsResource;
 
 class CartController extends ApiController
 {
@@ -117,9 +118,22 @@ class CartController extends ApiController
     /**
      * Display the specified resource.
      */
-    public function show(Cart $cart)
+    public function show(Cart $cart, $cart_id)
     {
-        //
+        $cart = Cart::find($cart_id);
+        if ($cart === null) {
+            return $this->errorResponse(
+                Response::HTTP_NOT_FOUND . " Not Found",
+                "Cart with id " . $cart_id . " is not found",
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        return $this->successResponse(
+            Response::HTTP_OK . " OK",
+            new CartWithDetailsResource($cart),
+            Response::HTTP_OK
+        );
     }
 
     /**

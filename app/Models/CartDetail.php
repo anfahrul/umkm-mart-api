@@ -16,4 +16,8 @@ class CartDetail extends Model
     protected $guarded = ['id'];
 
     public $timestamps = false;
+
+    public function cart() {
+        return $this->belongsTo(Cart::class);
+    }
 }

@@ -119,4 +119,5 @@ Route::group([
 ], function() {
     Route::post('/{product_id}', [CartController::class, 'store']);
     Route::get('/', [CartController::class, 'index']);
+    Route::get('/{cart_id}', [CartController::class, 'show']);
 });
