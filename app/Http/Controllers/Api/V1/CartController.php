@@ -36,10 +36,14 @@ class CartController extends ApiController
     public function index()
     {
         $customer = Customer::where('user_id', auth()->user()->id)->first();
+        $carts = $users = DB::table('carts')
+                ->where('customer_id', '=', $customer->id)
+                ->where('total', '>', 0)
+                ->get();
 
         return $this->successResponse(
             Response::HTTP_OK . " OK",
-            CartResource::collection(Customer::find($customer->id)->carts),
+            CartResource::collection($carts),
             Response::HTTP_OK
         );
     }
