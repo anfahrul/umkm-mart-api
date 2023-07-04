@@ -26,7 +26,7 @@ class UpdateMerchantRequest extends FormRequest
             'umkm_category_id' => ['required','integer'],
             'address' => ['required','string'],
             'is_open' => ['required','boolean'],
-            'wa_number' => ['required','string'],
+            'wa_number' => ['required','string','regex:/^62\d+$/'],
             'merchant_website_url' => ['string'],
             'operational_time_oneday' => ['required','integer'],
             'logo' => ['image','mimes:jpeg,jpg,png,svg','max:2048'],

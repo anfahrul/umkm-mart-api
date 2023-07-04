@@ -28,7 +28,7 @@ class StoreMerchantRequest extends FormRequest
             'merchant_name' => ['required', 'string'],
             'umkm_category_id' => ['required','integer'],
             'address' => ['required','string'],
-            'wa_number' => ['required','string'],
+            'wa_number' => ['required','string','regex:/^62\d+$/'],
             'merchant_website_url' => ['string'],
             'logo' => ['mimes:jpeg,jpg,png,svg','max:2048'],
             'operational_time_oneday' => ['required','integer'],

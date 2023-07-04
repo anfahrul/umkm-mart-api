@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\UmkmCategoryController;
 use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\CartDetailController;
+use App\Http\Controllers\Api\V1\CheckoutController;
 
 /*
 |--------------------------------------------------------------------------
@@ -124,4 +125,12 @@ Route::group([
     Route::put('/detail/{cart_detail_id}', [CartDetailController::class, 'update']);
     Route::delete('/detail/{cart_detail_id}', [CartDetailController::class, 'destroy']);
     Route::delete('/{cart_id}', [CartController::class, 'destroy']);
+});
+
+// api/v1/checkout
+Route::group([
+    'prefix' => 'v1/checkout',
+    'middleware' => ['auth.role:user']
+], function() {
+    Route::post('/{cart_id}', [CheckoutController::class, 'processCheckout']);
 });
