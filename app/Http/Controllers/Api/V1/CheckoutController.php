@@ -68,10 +68,6 @@ class CheckoutController extends ApiController
 
         $whatsAppUrl = $this->getWhatsAppUrl($merchant, $message);
 
-        // return response()->json([
-        //         'test' => $message
-        // ], 200);
-
         $data = [
             'status' => Response::HTTP_OK . ' OK',
             'message' => "Your request has been processed successfully",
